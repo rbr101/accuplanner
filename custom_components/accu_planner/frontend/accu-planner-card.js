@@ -6,7 +6,7 @@
  * Also: custom:accu-planner-plan-card (the charge plan as an overview)
  */
 (() => {
-  const VERSION = "1.11.1";
+  const VERSION = "1.11.2";
   const Q = 900000;
   const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const STOPS = [
