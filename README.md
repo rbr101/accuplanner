@@ -2,6 +2,8 @@
 
 Home Assistant custom integration that plans and executes charging and discharging of a home battery based on dynamic quarter-hour electricity prices.
 
+![Charge schedule card](images/charge-schedule-card.png)
+
 ## Installation
 
 **Manual:** copy `custom_components/accu_planner` to `/config/custom_components/` and restart Home Assistant.
@@ -117,9 +119,13 @@ height: 230
 show_soc: true       # SOC as a blue line (right axis)
 ```
 
+![Charge schedule card](images/charge-schedule-card.png)
+
 **Charge schedule** (`custom:accu-planner-card`): quarter-hour prices (green → red) in a fixed time window, up to 24 hours back with what was planned and the measured SOC (drawn fainter), charge quarters (●), discharge quarters (▼), export quarters ($) with a coloured strip below, the discharge price (dashed line), the expected SOC and a tooltip per quarter.
 
 **Charge plan** (`custom:accu-planner-plan-card`): now, stored energy cost and value, charge/discharge/sell times, expected and actual savings, expected SOC per mode change, discharge price and sell price.
+
+<img src="images/charge-plan-card.png" alt="Charge plan card" width="500">
 
 ```yaml
 type: custom:accu-planner-plan-card
