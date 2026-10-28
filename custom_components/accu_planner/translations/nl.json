@@ -216,6 +216,30 @@
     "switch": {
       "execute_plan": {
         "name": "Accu-plan uitvoeren"
+      },
+      "plan_charge_enabled": {
+        "name": "Laden volgens plan"
+      },
+      "solar_enabled": {
+        "name": "Laden bij zonne-overschot"
+      },
+      "solar_below_discharge_price": {
+        "name": "Zonneladen alleen onder ontlaadprijs"
+      },
+      "discharge_enabled": {
+        "name": "Ontladen naar verbruik"
+      },
+      "discharge_sell_enabled": {
+        "name": "Vol vermogen verkopen boven verkoopprijs"
+      },
+      "control_charge_at_max": {
+        "name": "Altijd laden op max laadvermogen"
+      },
+      "control_safe_on_off": {
+        "name": "Terug naar ontlaadstand bij uitschakelen"
+      },
+      "cost_floor": {
+        "name": "Kostprijs als ontlaadondergrens"
       }
     }
   },

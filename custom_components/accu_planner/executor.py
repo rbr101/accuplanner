@@ -124,6 +124,18 @@ class PlanExecutor:
                 async_track_time_interval(self.hass, self._solar_control, timedelta(seconds=CONTROL_INTERVAL_S))
             )
 
+    async def async_settings_changed(self) -> None:
+        """An on/off setting changed via a switch: restart the regulator timers and re-apply."""
+        self.async_stop()
+        if not self._conf(CONF_DIS_ENABLED):
+            self.discharge.reset()
+        if not self._conf(CONF_SOLAR_ENABLED):
+            self.solar.reset()
+        self.async_start()
+        await self.coordinator.async_request_refresh()
+        await self.async_apply("setting changed")
+        self._notify()
+
     @callback
     def async_stop(self) -> None:
         for unsub in self._unsubs:

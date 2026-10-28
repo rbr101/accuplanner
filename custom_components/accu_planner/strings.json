@@ -216,6 +216,30 @@
     "switch": {
       "execute_plan": {
         "name": "Execute battery plan"
+      },
+      "plan_charge_enabled": {
+        "name": "Charge by plan"
+      },
+      "solar_enabled": {
+        "name": "Charge on solar surplus"
+      },
+      "solar_below_discharge_price": {
+        "name": "Solar charging only below discharge price"
+      },
+      "discharge_enabled": {
+        "name": "Discharge to consumption"
+      },
+      "discharge_sell_enabled": {
+        "name": "Sell at full power above sell price"
+      },
+      "control_charge_at_max": {
+        "name": "Always charge at max charge power"
+      },
+      "control_safe_on_off": {
+        "name": "Return to discharge setting when switched off"
+      },
+      "cost_floor": {
+        "name": "Stored energy cost as discharge floor"
       }
     }
   },

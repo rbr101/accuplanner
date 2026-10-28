@@ -145,6 +145,22 @@ Execution: after every new plan, every quarter and every minute the desired stat
 | Expected savings | What the plan yields until the end of the known prices (€): avoided purchase + export − charging cost, corrected for more/less stored energy at the end. Attribute `after_wear` |
 | Total savings | Running total of the actual savings (€, `state_class: total` → long-term statistics). Attributes: `today`, `yesterday`, `this_week`, `previous_week`, `this_month`, `previous_month` |
 
+## Switches (Controls)
+
+All on/off settings are also available as switches on the integration's device page (under **Controls**), so they can be used in dashboards and automations. A change takes effect immediately (no reload) and is stored in the settings, so **Configure** shows the same value.
+
+| Switch | Setting |
+|---|---|
+| Execute battery plan | Main switch: control the battery according to the plan |
+| Charge by plan | Battery charge settings → Charge by plan |
+| Always charge at max charge power | Battery charge settings → Charge by plan |
+| Return to discharge setting when switched off | Battery charge settings → Charge by plan |
+| Charge on solar surplus | Battery charge settings → Charge on solar surplus |
+| Solar charging only below discharge price | Battery charge settings → Charge on solar surplus |
+| Discharge to consumption | Battery discharge settings → Control discharging |
+| Sell at full power above sell price | Battery discharge settings |
+| Stored energy cost as discharge floor | Planning |
+
 ## Dashboard cards
 
 The integration ships two cards (no extra installation). After installing/restarting, refresh the browser once.
