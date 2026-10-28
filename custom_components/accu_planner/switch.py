@@ -1,4 +1,4 @@
-"""Schakelaar 'Accu-plan uitvoeren'."""
+"""Switches: 'Execute battery plan' plus the on/off settings of the integration."""
 from __future__ import annotations
 
 from typing import Any
@@ -9,18 +9,51 @@ from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from .const import DOMAIN
+from .const import (
+    CONF_COST_FLOOR,
+    CONF_CTRL_CHARGE_MAX,
+    CONF_CTRL_SAFE_ON_OFF,
+    CONF_DIS_ENABLED,
+    CONF_DIS_SELL_ENABLED,
+    CONF_PLAN_ENABLED,
+    CONF_SOLAR_BELOW_DISCHARGE,
+    CONF_SOLAR_ENABLED,
+    DOMAIN,
+)
 from .coordinator import AccuPlannerConfigEntry
+
+# option key -> icon (same order as in the Configure menu)
+SETTING_SWITCHES: dict[str, str] = {
+    CONF_PLAN_ENABLED: "mdi:battery-clock",
+    CONF_CTRL_CHARGE_MAX: "mdi:battery-arrow-up",
+    CONF_CTRL_SAFE_ON_OFF: "mdi:battery-sync-outline",
+    CONF_SOLAR_ENABLED: "mdi:solar-power",
+    CONF_SOLAR_BELOW_DISCHARGE: "mdi:solar-power-variant",
+    CONF_DIS_ENABLED: "mdi:battery-arrow-down",
+    CONF_DIS_SELL_ENABLED: "mdi:cash-plus",
+    CONF_COST_FLOOR: "mdi:floor-plan",
+}
+
+
+def _device(entry: AccuPlannerConfigEntry) -> DeviceInfo:
+    return DeviceInfo(
+        identifiers={(DOMAIN, entry.entry_id)},
+        name=entry.title,
+        manufacturer="Accu Planner",
+        entry_type=DeviceEntryType.SERVICE,
+    )
 
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: AccuPlannerConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    async_add_entities([ExecutePlanSwitch(entry)])
+    entities: list[SwitchEntity] = [ExecutePlanSwitch(entry)]
+    entities += [SettingSwitch(entry, key, icon) for key, icon in SETTING_SWITCHES.items()]
+    async_add_entities(entities)
 
 
 class ExecutePlanSwitch(RestoreEntity, SwitchEntity):
-    """Aan: de accu volgt het laadschema. Stand blijft bewaard na een herstart."""
+    """On: the battery follows the charge plan. The state is kept across restarts."""
 
     _attr_has_entity_name = True
     _attr_translation_key = "execute_plan"
@@ -30,12 +63,7 @@ class ExecutePlanSwitch(RestoreEntity, SwitchEntity):
         self._entry = entry
         self._executor = entry.runtime_data.executor
         self._attr_unique_id = f"{entry.entry_id}_execute_plan"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name=entry.title,
-            manufacturer="Accu Planner",
-            entry_type=DeviceEntryType.SERVICE,
-        )
+        self._attr_device_info = _device(entry)
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
@@ -73,3 +101,36 @@ class ExecutePlanSwitch(RestoreEntity, SwitchEntity):
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         await self._executor.async_set_enabled(False)
+
+
+class SettingSwitch(SwitchEntity):
+    """An on/off setting from the Configure menu; changes are saved in the options without a reload."""
+
+    _attr_has_entity_name = True
+
+    def __init__(self, entry: AccuPlannerConfigEntry, key: str, icon: str) -> None:
+        self._entry = entry
+        self._key = key
+        self._attr_translation_key = key
+        self._attr_icon = icon
+        self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_device_info = _device(entry)
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self._entry.runtime_data.conf.get(self._key))
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self._set(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self._set(False)
+
+    async def _set(self, value: bool) -> None:
+        coordinator = self._entry.runtime_data
+        if bool(coordinator.conf.get(self._key)) == value:
+            return
+        coordinator.conf[self._key] = value  # first, so the update listener sees no change and skips the reload
+        self.hass.config_entries.async_update_entry(self._entry, options={**self._entry.options, self._key: value})
+        self.async_write_ha_state()
+        await coordinator.executor.async_settings_changed()

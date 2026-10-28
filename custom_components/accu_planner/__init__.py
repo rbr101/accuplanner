@@ -92,6 +92,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: AccuPlannerConfigEntry) 
 
 
 async def _async_reload(hass: HomeAssistant, entry: AccuPlannerConfigEntry) -> None:
+    coordinator = getattr(entry, "runtime_data", None)
+    if coordinator is not None and {**DEFAULTS, **entry.data, **entry.options} == coordinator.conf:
+        return  # changed by a setting switch, already applied without reload
     await hass.config_entries.async_reload(entry.entry_id)
 
 
