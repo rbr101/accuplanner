@@ -1,0 +1,234 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Accu Planner",
+        "description": "Plant laden en ontladen van je thuisaccu op basis van kwartierprijzen.",
+        "data": {
+          "name": "Naam",
+          "capacity_sensor": "Accu totale capaciteit sensor",
+          "soc_sensor": "Accu laadtoestand sensor (SOC)",
+          "price_sensor": "Inkoopprijs-sensor",
+          "sell_price_sensor": "Verkoopprijs-sensor (optioneel)",
+          "pv_power_sensor": "PV-vermogen-sensor (optioneel)",
+          "profile": "Verbruiksprofiel (kW per tijdsblok)",
+          "profile_weekend": "Verbruiksprofiel weekend (optioneel)",
+          "efficiency": "Laadrendement",
+          "wear_cost": "Wear cost & discharge margin",
+          "solar_cost": "Kostprijs zonne-energie",
+          "charge_power": "Max laadvermogen",
+          "discharge_power": "Max ontlaadvermogen",
+          "min_soc": "Minimale SOC",
+          "max_soc": "Maximale SOC",
+          "cost_floor": "Kostprijs als ondergrens voor ontladen",
+          "update_interval": "Herberekenen elke",
+          "profit_pct": "Winstpercentage verkoop"
+        },
+        "data_description": {
+          "profile": "Formaat: 07-10=1.5; 17:30-19=2.5; 22-07=1.0; *=0.4  (* = rest van de dag)",
+          "profile_weekend": "Leeg = zelfde als doordeweeks",
+          "efficiency": "Deel van de netstroom dat in de accu komt (10 kWh inhoud ≈ 11,8 kWh van het net bij 85%)",
+          "wear_cost": "Slijtage van de accu plus extra marge, per kWh die uit de accu komt. Telt mee in de ontlaadprijs (waarde + dit bedrag), de verkoopprijs en de besparing na slijtage",
+          "solar_cost": "Kostprijs voor SOC-stijging zonder laden uit het net",
+          "cost_floor": "Aan: nooit ontladen onder kostprijs inhoud + afschrijving + marge",
+          "price_sensor": "Kwartier- of uurprijzen voor afname in de attributen; bepaalt laadkosten en de besparing van eigen verbruik uit de accu",
+          "sell_price_sensor": "Prijzen voor teruglevering. Leeg = de inkoopprijs wordt gebruikt",
+          "pv_power_sensor": "Voor de kostprijs: het deel van het laden dat de PV levert telt als zonne-energie. Leeg = elke SOC-stijging telt tegen de inkoopprijs",
+          "profit_pct": "Verkoopprijs = (kostprijs accu-inhoud + wear cost & discharge margin) × (1 + percentage). Verkopen stel je in bij Battery discharge settings",
+          "capacity_sensor": "Totale capaciteit in kWh of Wh",
+          "soc_sensor": "Laadtoestand in %"
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "Profiel niet begrepen, gebruik bv. 07-10=1.5; *=0.4",
+      "min_above_max": "Maximale SOC moet hoger zijn dan minimale SOC"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Accu Planner",
+        "menu_options": {
+          "planning": "Planning (prijzen, verbruik, kosten, verkoop)",
+          "grid": "Grid & Battery settings (accu-entiteiten en netmeter)",
+          "control": "Battery charge settings (laden volgens plan en bij zonne-overschot)",
+          "discharge": "Battery discharge settings (ontladen naar verbruik en verkopen)"
+        }
+      },
+      "planning": {
+        "title": "Planning",
+        "data": {
+          "price_sensor": "Inkoopprijs-sensor",
+          "sell_price_sensor": "Verkoopprijs-sensor (optioneel)",
+          "pv_power_sensor": "PV-vermogen-sensor (optioneel)",
+          "profile": "Verbruiksprofiel (kW per tijdsblok)",
+          "profile_weekend": "Verbruiksprofiel weekend (optioneel)",
+          "efficiency": "Laadrendement",
+          "wear_cost": "Wear cost & discharge margin",
+          "solar_cost": "Kostprijs zonne-energie",
+          "charge_power": "Max laadvermogen",
+          "discharge_power": "Max ontlaadvermogen",
+          "min_soc": "Minimale SOC",
+          "max_soc": "Maximale SOC",
+          "cost_floor": "Kostprijs als ondergrens voor ontladen",
+          "update_interval": "Herberekenen elke",
+          "profit_pct": "Winstpercentage verkoop"
+        },
+        "data_description": {
+          "profile": "Formaat: 07-10=1.5; 17:30-19=2.5; 22-07=1.0; *=0.4  (* = rest van de dag)",
+          "profile_weekend": "Leeg = zelfde als doordeweeks",
+          "efficiency": "Deel van de netstroom dat in de accu komt (10 kWh inhoud ≈ 11,8 kWh van het net bij 85%)",
+          "wear_cost": "Slijtage van de accu plus extra marge, per kWh die uit de accu komt. Telt mee in de ontlaadprijs (waarde + dit bedrag), de verkoopprijs en de besparing na slijtage",
+          "solar_cost": "Kostprijs voor SOC-stijging zonder laden uit het net",
+          "cost_floor": "Aan: nooit ontladen onder kostprijs inhoud + afschrijving + marge",
+          "price_sensor": "Kwartier- of uurprijzen voor afname in de attributen; bepaalt laadkosten en de besparing van eigen verbruik uit de accu",
+          "sell_price_sensor": "Prijzen voor teruglevering. Leeg = de inkoopprijs wordt gebruikt",
+          "pv_power_sensor": "Voor de kostprijs: het deel van het laden dat de PV levert telt als zonne-energie. Leeg = elke SOC-stijging telt tegen de inkoopprijs",
+          "profit_pct": "Verkoopprijs = (kostprijs accu-inhoud + wear cost & discharge margin) × (1 + percentage). Verkopen stel je in bij Battery discharge settings"
+        }
+      },
+      "control": {
+        "title": "Battery charge settings",
+        "description": "Met de schakelaar 'Accu-plan uitvoeren' laadt de accu volgens het laadschema en bij zonne-overschot. De accu wordt aangestuurd via de entiteiten uit Grid & Battery settings: {mode_entity} en {power_entity}.",
+        "data": {},
+        "data_description": {},
+        "sections": {
+          "plan": {
+            "name": "Laden volgens plan",
+            "description": "Laadvensters van de planner hebben altijd voorrang.",
+            "data": {
+              "plan_charge_enabled": "Laden volgens plan",
+              "control_charge_at_max": "Altijd laden op max laadvermogen",
+              "control_power_discharge": "Vermogen na het laden",
+              "control_safe_on_off": "Bij uitzetten terug naar ontlaadstand"
+            },
+            "data_description": {
+              "control_charge_at_max": "Uit: het geplande laadvermogen van het kwartier (max = instelling 'Max laadvermogen')",
+              "control_power_discharge": "0 W = netverbruik op nul houden (accu dekt eigen verbruik)",
+              "control_safe_on_off": "Ook gebruikt als de planning verouderd of mislukt is",
+              "plan_charge_enabled": "Uit: de laadvensters van de planner worden niet uitgevoerd (zonneladen en ontladen werken wel)"
+            }
+          },
+          "solar": {
+            "name": "Laden bij zonne-overschot",
+            "description": "Buiten de laadvensters volgt het laadvermogen de teruglevering (elke 3 s meten, elke 15 s bijregelen: +0,6 × overschot, max +400 / −1000 W per stap). 0 W = accu vasthouden. Gebruikt de netmeter uit Grid & Battery settings: {export_entity} / {import_entity}.",
+            "data": {
+              "solar_enabled": "Laden bij zonne-overschot",
+              "solar_pv_entity": "PV-productie-sensor",
+              "solar_min_power": "Minimaal laadvermogen",
+              "solar_max_power": "Maximaal laadvermogen",
+              "solar_below_discharge_price": "Alleen als de prijs onder de ontlaadprijs ligt"
+            },
+            "data_description": {
+              "solar_pv_entity": "Regelaar meet alleen als deze sensor > 1 W produceert, bv. sensor.growatt_solar_ac_power. Leeg = altijd meten",
+              "solar_min_power": "Onder dit doelvermogen wordt 0 W gestuurd",
+              "solar_below_discharge_price": "Boven de ontlaadprijs laat de integratie de accu met rust (dan regelen je ontlaad-automatiseringen het)"
+            }
+          }
+        }
+      },
+      "discharge": {
+        "title": "Battery discharge settings",
+        "description": "Gebruikt de accu-aansturing uit Grid & Battery settings:\n• modus-entiteit {mode_entity} → optie '{discharge_option}'\n• vermogens-entiteit {power_entity}\nen de netmeter uit Grid & Battery settings: {export_entity} (teruglevering) / {import_entity} (afname).\n\nBoven de ontlaadprijs levert de accu precies wat het huis verbruikt (afname naar 0 W: elke 3 s meten, elke 20 s bijregelen met 0,25 × de afname). Boven de verkoopprijs ontlaadt hij op vol vermogen en levert hij terug. Op of onder de ontlaadprijs gaat het vermogen naar 0 W. Werkt alleen als 'Accu-plan uitvoeren' aan staat.",
+        "data": {
+          "discharge_enabled": "Ontladen aansturen",
+          "discharge_min_soc": "Niet ontladen onder SOC",
+          "discharge_min_power": "Minimaal ontlaadvermogen",
+          "discharge_max_power": "Maximaal ontlaadvermogen",
+          "discharge_sell_enabled": "Verkopen op vol vermogen boven de verkoopprijs",
+          "discharge_sell_power": "Vermogen bij verkopen",
+          "discharge_hysteresis": "Hysterese"
+        },
+        "data_description": {
+          "discharge_min_power": "Onder dit doelvermogen wordt 0 W gestuurd",
+          "discharge_sell_enabled": "Verkoopprijs = (kostprijs accu-inhoud + wear cost & discharge margin) × (1 + winstpercentage), zie de sensor Verkoopprijs. Plant ook terugleveren in het laadplan",
+          "discharge_hysteresis": "Eenmaal aan het ontladen blijft hij ontladen tot de prijs meer dan dit onder de ontlaadprijs zakt (voorkomt aan/uit-wisselen doordat de ontlaadprijs met de SOC meebeweegt)"
+        }
+      },
+      "grid": {
+        "title": "Grid & Battery settings",
+        "description": "De accu-entiteiten en de netmeter (bv. P1). Gebruikt door Battery charge settings en Battery discharge settings; eerst wordt de modus gezet, daarna het vermogen.",
+        "data": {
+          "capacity_sensor": "Accu totale capaciteit sensor",
+          "soc_sensor": "Accu laadtoestand sensor (SOC)",
+          "control_mode_entity": "Modus-entiteit (select)",
+          "control_option_charge": "Optie bij laden",
+          "control_option_discharge": "Optie bij ontladen",
+          "control_power_entity": "Vermogens-entiteit (number)",
+          "solar_export_entity": "Teruglevering-sensor (power production)",
+          "solar_import_entity": "Afname-sensor (power consumption)"
+        },
+        "data_description": {
+          "control_mode_entity": "Bv. select.buiten_anker_solix_grid_flow",
+          "control_option_charge": "Optie van de modus-entiteit om te laden, bv. charge",
+          "control_option_discharge": "Optie van de modus-entiteit om te ontladen (ook na het laden), bv. discharge",
+          "control_power_entity": "Bv. number.buiten_anker_solix_target_grid_power",
+          "solar_export_entity": "Vermogen dat naar het net gaat, W of kW, bv. sensor.power_production",
+          "solar_import_entity": "Vermogen dat van het net komt, W of kW, bv. sensor.power_consumption",
+          "capacity_sensor": "Totale capaciteit in kWh of Wh",
+          "soc_sensor": "Laadtoestand in %"
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "Profiel niet begrepen, gebruik bv. 07-10=1.5; *=0.4",
+      "min_above_max": "Maximale SOC moet hoger zijn dan minimale SOC",
+      "no_control_entities": "Kies eerst de accu-entiteiten (modus en/of vermogen) in Grid & Battery settings",
+      "needs_grid_sensors": "Stel eerst de netmeter in onder Grid & Battery settings"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "mode": {
+        "name": "Modus",
+        "state": {
+          "charge": "Laden",
+          "discharge": "Ontladen",
+          "idle": "Niets"
+        }
+      },
+      "charge_power": {
+        "name": "Laadvermogen"
+      },
+      "discharge_power": {
+        "name": "Ontlaadvermogen"
+      },
+      "discharge_price": {
+        "name": "Ontlaadprijs"
+      },
+      "avg_cost": {
+        "name": "Kostprijs accu-inhoud"
+      },
+      "soc_end": {
+        "name": "SOC einde planning"
+      },
+      "sell_price": {
+        "name": "Verkoopprijs"
+      },
+      "expected_savings": {
+        "name": "Verwachte besparing"
+      },
+      "savings_total": {
+        "name": "Besparing totaal"
+      }
+    },
+    "switch": {
+      "execute_plan": {
+        "name": "Accu-plan uitvoeren"
+      }
+    }
+  },
+  "services": {
+    "set_cost_price": {
+      "name": "Kostprijs instellen",
+      "description": "Zet de gemiddelde kostprijs van de accu-inhoud handmatig.",
+      "fields": {
+        "cost_ct": {
+          "name": "Kostprijs",
+          "description": "Cent per kWh in de accu"
+        }
+      }
+    }
+  }
+}

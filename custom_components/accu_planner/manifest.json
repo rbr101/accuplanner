@@ -1,0 +1,23 @@
+{
+  "domain": "accu_planner",
+  "name": "Accu Planner",
+  "codeowners": [
+    "@rbr101"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "frontend",
+    "http"
+  ],
+  "documentation": "https://github.com/rbr101/accuplanner",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/rbr101/accuplanner/issues",
+  "requirements": [
+    "numpy"
+  ],
+  "version": "1.11.1",
+  "after_dependencies": [
+    "recorder"
+  ]
+}

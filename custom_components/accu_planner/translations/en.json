@@ -1,0 +1,234 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Accu Planner",
+        "description": "Plans charging and discharging of your home battery based on quarter-hour prices. Battery control, grid meter and execution can be set afterwards under Configure.",
+        "data": {
+          "name": "Name",
+          "capacity_sensor": "Battery total capacity sensor",
+          "soc_sensor": "Battery state of charge sensor",
+          "price_sensor": "Purchase price sensor",
+          "sell_price_sensor": "Sell price sensor (optional)",
+          "pv_power_sensor": "PV power sensor (optional)",
+          "profile": "Consumption profile (kW per time block)",
+          "profile_weekend": "Weekend consumption profile (optional)",
+          "efficiency": "Charge efficiency",
+          "wear_cost": "Wear cost & discharge margin",
+          "solar_cost": "Solar energy cost",
+          "charge_power": "Max charge power",
+          "discharge_power": "Max discharge power",
+          "min_soc": "Minimum SOC",
+          "max_soc": "Maximum SOC",
+          "cost_floor": "Use stored energy cost as discharge floor",
+          "profit_pct": "Sell profit percentage",
+          "update_interval": "Recalculate every"
+        },
+        "data_description": {
+          "capacity_sensor": "Total capacity in kWh or Wh, e.g. sensor.buiten_anker_solix_battery_capacity",
+          "soc_sensor": "State of charge in %, e.g. sensor.buiten_anker_solix_soc",
+          "price_sensor": "Quarter-hour or hourly purchase prices in the attributes (Zonneplan, Nordpool, EnergyZero, Tibber, …). Used for charging cost and for the savings of self-consumption from the battery",
+          "sell_price_sensor": "Feed-in prices in the same format. Empty = the purchase price is used",
+          "pv_power_sensor": "For the stored energy cost: the share of charging covered by PV counts as solar energy. Empty = every SOC increase is priced at the purchase price",
+          "profile": "Format: 07-10=1.5; 17:30-19=2.5; 22-07=1.0; *=0.4  (* = rest of the day)",
+          "profile_weekend": "Empty = same as weekdays",
+          "efficiency": "Share of grid energy that ends up in the battery (10 kWh stored ≈ 11.8 kWh from the grid at 85%)",
+          "wear_cost": "Battery wear plus extra margin per kWh discharged. Added to the discharge price, the sell price and the savings after wear",
+          "solar_cost": "Cost of an SOC increase without charging from the grid",
+          "cost_floor": "On: never discharge below the stored energy cost + wear cost & discharge margin",
+          "profit_pct": "Sell price = (stored energy cost + wear cost & discharge margin) × (1 + percentage). Selling is controlled in Battery discharge settings"
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "Profile not understood, use e.g. 07-10=1.5; *=0.4",
+      "min_above_max": "Maximum SOC must be above minimum SOC"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Accu Planner",
+        "menu_options": {
+          "planning": "Planning (prices, consumption, costs, selling)",
+          "grid": "Grid & Battery settings (battery entities and grid meter)",
+          "control": "Battery charge settings (charge by plan and on solar surplus)",
+          "discharge": "Battery discharge settings (discharge to consumption and sell)"
+        }
+      },
+      "planning": {
+        "title": "Planning",
+        "data": {
+          "price_sensor": "Purchase price sensor",
+          "sell_price_sensor": "Sell price sensor (optional)",
+          "pv_power_sensor": "PV power sensor (optional)",
+          "profile": "Consumption profile (kW per time block)",
+          "profile_weekend": "Weekend consumption profile (optional)",
+          "efficiency": "Charge efficiency",
+          "wear_cost": "Wear cost & discharge margin",
+          "solar_cost": "Solar energy cost",
+          "charge_power": "Max charge power",
+          "discharge_power": "Max discharge power",
+          "min_soc": "Minimum SOC",
+          "max_soc": "Maximum SOC",
+          "cost_floor": "Use stored energy cost as discharge floor",
+          "profit_pct": "Sell profit percentage",
+          "update_interval": "Recalculate every"
+        },
+        "data_description": {
+          "price_sensor": "Quarter-hour or hourly purchase prices in the attributes (Zonneplan, Nordpool, EnergyZero, Tibber, …). Used for charging cost and for the savings of self-consumption from the battery",
+          "sell_price_sensor": "Feed-in prices in the same format. Empty = the purchase price is used",
+          "pv_power_sensor": "For the stored energy cost: the share of charging covered by PV counts as solar energy. Empty = every SOC increase is priced at the purchase price",
+          "profile": "Format: 07-10=1.5; 17:30-19=2.5; 22-07=1.0; *=0.4  (* = rest of the day)",
+          "profile_weekend": "Empty = same as weekdays",
+          "efficiency": "Share of grid energy that ends up in the battery (10 kWh stored ≈ 11.8 kWh from the grid at 85%)",
+          "wear_cost": "Battery wear plus extra margin per kWh discharged. Added to the discharge price, the sell price and the savings after wear",
+          "solar_cost": "Cost of an SOC increase without charging from the grid",
+          "cost_floor": "On: never discharge below the stored energy cost + wear cost & discharge margin",
+          "profit_pct": "Sell price = (stored energy cost + wear cost & discharge margin) × (1 + percentage). Selling is controlled in Battery discharge settings"
+        }
+      },
+      "control": {
+        "title": "Battery charge settings",
+        "description": "With the 'Execute battery plan' switch on, the battery charges by the schedule and on solar surplus. It is controlled with the entities from Grid & Battery settings: {mode_entity} and {power_entity}.",
+        "data": {},
+        "data_description": {},
+        "sections": {
+          "plan": {
+            "name": "Charge by plan",
+            "description": "Charge windows of the planner always take precedence.",
+            "data": {
+              "plan_charge_enabled": "Charge by plan",
+              "control_charge_at_max": "Always charge at max charge power",
+              "control_power_discharge": "Power after charging",
+              "control_safe_on_off": "Return to discharge setting when switched off"
+            },
+            "data_description": {
+              "plan_charge_enabled": "Off: the planner's charge windows are not executed (solar surplus charging and discharging still work)",
+              "control_charge_at_max": "Off: the planned charge power of the quarter",
+              "control_power_discharge": "After a charge window the battery returns once to the discharge option with this power",
+              "control_safe_on_off": "Also used when the plan is outdated or failed"
+            }
+          },
+          "solar": {
+            "name": "Charge on solar surplus",
+            "description": "Outside charge windows the charge power follows the grid export (measure every 3 s, adjust every 15 s: +0.6 × surplus, max +400 / −1000 W per step). 0 W = hold the battery. Uses the grid meter from Grid & Battery settings: {export_entity} / {import_entity}.",
+            "data": {
+              "solar_enabled": "Charge on solar surplus",
+              "solar_pv_entity": "PV production sensor",
+              "solar_min_power": "Minimum charge power",
+              "solar_max_power": "Maximum charge power",
+              "solar_below_discharge_price": "Only when the price is below the discharge price"
+            },
+            "data_description": {
+              "solar_pv_entity": "The regulator only measures while this sensor produces > 1 W, e.g. sensor.growatt_solar_ac_power. Empty = always measure",
+              "solar_min_power": "Below this target 0 W is sent",
+              "solar_below_discharge_price": "Above the discharge price the battery is left to Battery discharge settings"
+            }
+          }
+        }
+      },
+      "discharge": {
+        "title": "Battery discharge settings",
+        "description": "Uses the battery control from Grid & Battery settings:\n• mode entity {mode_entity} → option '{discharge_option}'\n• power entity {power_entity}\nand the grid meter: {export_entity} (export) / {import_entity} (import).\n\nAbove the discharge price the battery supplies exactly the house consumption (grid import towards 0 W: measure every 3 s, adjust every 20 s by 0.25 × the import). Above the sell price it discharges at full power and exports. At or below the discharge price the power goes to 0 W. Only active while 'Execute battery plan' is on.",
+        "data": {
+          "discharge_enabled": "Control discharging",
+          "discharge_min_soc": "Do not discharge below SOC",
+          "discharge_min_power": "Minimum discharge power",
+          "discharge_max_power": "Maximum discharge power",
+          "discharge_hysteresis": "Hysteresis",
+          "discharge_sell_enabled": "Sell at full power above the sell price",
+          "discharge_sell_power": "Power when selling"
+        },
+        "data_description": {
+          "discharge_min_power": "Below this target 0 W is sent",
+          "discharge_hysteresis": "Once discharging, keep discharging until the price drops this much below the discharge price (prevents switching on and off as the discharge price moves with the SOC)",
+          "discharge_sell_enabled": "Sell price = (stored energy cost + wear cost & discharge margin) × (1 + profit percentage), see the Sell price sensor. Also plans export in the charge plan"
+        }
+      },
+      "grid": {
+        "title": "Grid & Battery settings",
+        "description": "The battery entities and the grid meter (e.g. P1). Used by Battery charge settings and Battery discharge settings; the mode is set first, then the power.",
+        "data": {
+          "capacity_sensor": "Battery total capacity sensor",
+          "soc_sensor": "Battery state of charge sensor",
+          "control_mode_entity": "Mode entity (select)",
+          "control_option_charge": "Option when charging",
+          "control_option_discharge": "Option when discharging",
+          "control_power_entity": "Power entity (number)",
+          "solar_export_entity": "Grid export sensor (power production)",
+          "solar_import_entity": "Grid import sensor (power consumption)"
+        },
+        "data_description": {
+          "capacity_sensor": "Total capacity in kWh or Wh, e.g. sensor.buiten_anker_solix_battery_capacity",
+          "soc_sensor": "State of charge in %, e.g. sensor.buiten_anker_solix_soc",
+          "control_mode_entity": "E.g. select.buiten_anker_solix_grid_flow",
+          "control_option_charge": "Option of the mode entity for charging, e.g. charge",
+          "control_option_discharge": "Option of the mode entity for discharging (also used after charging), e.g. discharge",
+          "control_power_entity": "E.g. number.buiten_anker_solix_target_grid_power",
+          "solar_export_entity": "Power fed into the grid, W or kW, e.g. sensor.power_production",
+          "solar_import_entity": "Power drawn from the grid, W or kW, e.g. sensor.power_consumption"
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "Profile not understood, use e.g. 07-10=1.5; *=0.4",
+      "min_above_max": "Maximum SOC must be above minimum SOC",
+      "no_control_entities": "Choose the battery entities (mode and/or power) in Grid & Battery settings first",
+      "needs_grid_sensors": "Configure the grid meter in Grid & Battery settings first"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "mode": {
+        "name": "Mode",
+        "state": {
+          "charge": "Charge",
+          "discharge": "Discharge",
+          "idle": "Idle"
+        }
+      },
+      "charge_power": {
+        "name": "Charge power"
+      },
+      "discharge_power": {
+        "name": "Discharge power"
+      },
+      "discharge_price": {
+        "name": "Discharge price"
+      },
+      "avg_cost": {
+        "name": "Stored energy cost"
+      },
+      "soc_end": {
+        "name": "SOC end of plan"
+      },
+      "sell_price": {
+        "name": "Sell price"
+      },
+      "expected_savings": {
+        "name": "Expected savings"
+      },
+      "savings_total": {
+        "name": "Total savings"
+      }
+    },
+    "switch": {
+      "execute_plan": {
+        "name": "Execute battery plan"
+      }
+    }
+  },
+  "services": {
+    "set_cost_price": {
+      "name": "Set cost price",
+      "description": "Manually set the average cost price of the stored energy.",
+      "fields": {
+        "cost_ct": {
+          "name": "Cost price",
+          "description": "Cents per kWh in the battery"
+        }
+      }
+    }
+  }
+}
