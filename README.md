@@ -1,4 +1,7 @@
 # Accu Planner
+This is a custom homeassistant integration that manages energy efficiency for a home battery, dynamic energy prices and solar setup.
+I started in nodered and tested it for a few months, now everything seems to work fine and it can run autonomous.
+I used vibe coding to create an home assistant integration which i'm using now.
 
 Home Assistant custom integration that plans and executes charging and discharging of a home battery based on dynamic quarter-hour electricity prices.
 
@@ -245,6 +248,3 @@ Dynamic programming over the battery content (steps of 0.05 kWh) until the end o
 
 Because the whole horizon is considered at once, the battery only charges what is needed if cheaper charging is possible later (e.g. at night or in the midday dip). The discharge price is the value of the next kWh on the planned path + wear cost & discharge margin.
 
-## Logo
-
-The integration has its own icon and logo in `brand/` (light and dark). Home Assistant shows them from version 2026.3.
