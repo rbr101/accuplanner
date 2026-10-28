@@ -1,0 +1,12 @@
+set_cost_price:
+  fields:
+    cost_ct:
+      required: true
+      example: 21.5
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 0.1
+          unit_of_measurement: "ct/kWh"
+          mode: box
