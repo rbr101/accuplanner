@@ -4,6 +4,45 @@ Home Assistant custom integration that plans and executes charging and dischargi
 
 ![Charge schedule card](https://raw.githubusercontent.com/rbr101/accuplanner/main/images/charge-schedule-card.png)
 
+## In short: when does the battery charge, discharge and sell?
+
+### Charging
+
+**By plan:** the planner looks at all known quarter-hour prices (up to the end of tomorrow) and charges in the **cheapest quarters**, only as much as is needed for the expensive moments that follow.
+Charging only pays off if it saves more later than it costs, including the losses (efficiency, default 85 %) and wear. Charging at €0.40 effectively costs about €0.40 ÷ 0.85 + 3 ct ≈ €0.50 per kWh.
+*Example:* charging at 23:45 and 02:15–04:30 at an average of €0.409, for the expensive morning and evening.
+
+**On solar surplus (if enabled):** when you export to the grid, the battery absorbs the surplus, but only while the price is below the discharge price.
+
+### Discharging
+
+The **discharge price** = what 1 kWh in the battery is worth + wear cost & discharge margin.
+
+- **Price above the discharge price** → the battery discharges to your house; the power follows your consumption so that you take (almost) nothing from the grid.
+  *Example:* discharge price €0.512, price now €0.550 → discharging.
+- **Price below the discharge price** → the battery holds (0 W) and the house uses grid power. The energy is kept for a more expensive moment.
+
+The discharge price changes during the day (dashed line in the chart): when expensive hours are still ahead and cheap recharging is no longer possible, the energy in the battery is worth more.
+
+### Discharging at maximum power (selling)
+
+The **sell price** = (stored energy cost + wear cost) × (1 + profit percentage).
+*Example:* (€0.348 + €0.03) × 1.75 = **€0.661**.
+
+- **Price above the sell price** → discharge at full power (default 3500 W); whatever the house does not use is exported and sold.
+  *Example:* Thu 16:45–19:15 (purple strip) → 3.2 kWh sold at an average of €0.717.
+- Selling only happens in quarters in which the battery would discharge anyway.
+
+**The profit percentage determines how often it sells:** higher = sell less often but earn more per kWh; lower = sell more often. If the sell price ends up below the discharge price, every discharge quarter becomes a full-power sell.
+
+### Per quarter, in order
+
+1. Charge quarter in the plan → **charge**
+2. Price > sell price → **full power discharge + sell**
+3. Price > discharge price → **discharge to consumption**
+4. Solar surplus and price below the discharge price → **charge from the surplus**
+5. Otherwise → **hold** (0 W)
+
 ## Installation
 
 **Manual:** copy `custom_components/accu_planner` to `/config/custom_components/` and restart Home Assistant.
