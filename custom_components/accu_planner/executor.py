@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.event import async_track_state_change_event, async_track_time_interval
 from homeassistant.util import dt as dt_util
 
 from .const import (
@@ -21,7 +21,10 @@ from .const import (
     CONF_CTRL_POWER_DISCHARGE,
     CONF_CTRL_POWER_ENTITY,
     CONF_CTRL_SAFE_ON_OFF,
+    CONF_DIS_CAR_BLOCK,
+    CONF_DIS_CAR_ENTITY,
     CONF_DIS_ENABLED,
+    CONF_DIS_SPEED,
     CONF_DIS_HYSTERESIS,
     CONF_DIS_MAX_POWER,
     CONF_DIS_MIN_POWER,
@@ -41,13 +44,13 @@ from .const import (
 )
 from .solar import (
     CONTROL_INTERVAL_S,
-    DIS_CONTROL_INTERVAL_S,
     DIS_MIN_CHANGE_W,
     DIS_SAMPLE_INTERVAL_S,
     MIN_CHANGE_W,
     SAMPLE_INTERVAL_S,
     DischargeRegulator,
     SurplusRegulator,
+    discharge_speed,
 )
 
 if TYPE_CHECKING:
@@ -110,12 +113,17 @@ class PlanExecutor:
         if self.coordinator.last_update_success and self.coordinator.data:
             self._last_good = dt_util.utcnow()
         if self._conf(CONF_DIS_ENABLED):
+            interval, self.discharge.gain = discharge_speed(self._conf(CONF_DIS_SPEED))
             self._unsubs.append(
                 async_track_time_interval(self.hass, self._dis_sample, timedelta(seconds=DIS_SAMPLE_INTERVAL_S))
             )
             self._unsubs.append(
-                async_track_time_interval(self.hass, self._dis_control, timedelta(seconds=DIS_CONTROL_INTERVAL_S))
+                async_track_time_interval(self.hass, self._dis_control, timedelta(seconds=interval))
             )
+            if self._conf(CONF_DIS_CAR_BLOCK) and (car := self._conf(CONF_DIS_CAR_ENTITY)):
+                self._unsubs.append(
+                    async_track_state_change_event(self.hass, [car], self._car_changed)
+                )
         if self._conf(CONF_SOLAR_ENABLED):
             self._unsubs.append(
                 async_track_time_interval(self.hass, self._solar_sample, timedelta(seconds=SAMPLE_INTERVAL_S))
@@ -282,6 +290,8 @@ class PlanExecutor:
         discharging = self.target in ("dis", "dis_sell")
         if not (price >= thr - hyst if discharging else price > thr):
             return None
+        if self._car_charging():
+            return None
         st = self.hass.states.get(self._conf(CONF_SOC_SENSOR) or "")
         try:
             if st is None or not float(st.state) > float(self._conf(CONF_DIS_MIN_SOC) or 0):
@@ -295,6 +305,20 @@ class PlanExecutor:
         ):
             return "dis_sell"
         return "dis"
+
+    @callback
+    def _car_changed(self, _event) -> None:
+        self._schedule("car charger")
+
+    def _car_charging(self) -> bool:
+        """The car charger draws power: do not discharge the battery into the car."""
+        if not self._conf(CONF_DIS_CAR_BLOCK):
+            return False
+        power = self._watts(self._conf(CONF_DIS_CAR_ENTITY))
+        if power is not None and power > 0:
+            self.discharge_status = f"car charging ({round(power)} W): not discharging"
+            return True
+        return False
 
     def _solar_active(self) -> bool:
         """Zonne-overschot mag de accu sturen (buiten laadvensters)."""

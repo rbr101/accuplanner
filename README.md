@@ -114,16 +114,19 @@ Executed while the **Execute battery plan** switch is on (its state is kept acro
 
 With its own on/off switch (default off). Works like the original Node-RED discharge flow and uses the battery control and grid meter from Grid & Battery settings; the form shows which entities:
 
-- **price > discharge price** and SOC above the minimum: mode `discharge`, the power follows the consumption so that grid import goes towards 0 W (measure import − export every 3 s, adjust every 20 s by 0.25 × the average, limited 0 – max, 0 W below 100 W, rounded to 50 W, only sent on ≥ 100 W change; after 5 cycles against a limit it takes over the current battery setting). On start it continues from the current discharge power (not from 0 W) and after a short interruption (< 10 min) from its last value;
+- **price > discharge price** and SOC above the minimum: mode `discharge`, the power follows the consumption so that grid import goes towards 0 W (measure import − export every 3 s, adjust at the chosen reaction speed (default every 20 s by 0.25 × the average), limited 0 – max, 0 W below 100 W, rounded to 50 W, only sent on ≥ 100 W change; after 5 cycles against a limit it takes over the current battery setting). On start it continues from the current discharge power (not from 0 W) and after a short interruption (< 10 min) from its last value;
 - **price > sell price** (while discharging): discharge at full power (default 3500 W) = export. The charge plan follows the same rule. If the sell price is below the discharge price, every discharge quarter is also a sell quarter;
-- **price ≤ discharge price** (and no solar surplus charging): power 0 W.
+- **price ≤ discharge price**, or the car is charging (and no solar surplus charging): power 0 W.
 
 | Setting | Default |
 |---|---|
 | Control discharging | off |
 | Do not discharge below SOC | 2 % |
 | Minimum / maximum discharge power | 100 W / 3500 W |
+| Reaction speed | 4 — slider 1 (slow) … 10 (fast). Slow: short consumption peaks (kettle, oven switching) are ignored and only sustained changes are followed (1 = adjust every 60 s). Fast: shorter peaks are followed too (10 = every 5 s). 4 = every 20 s by 0.25 × the import, like the Node-RED flow |
 | Hysteresis | 1 ct (once discharging, only stop when the price drops this much below the discharge price) |
+| Do not discharge while the car is charging | on — while the car charger sensor is above 0 W the battery does not discharge (0 W), so the car is not charged from the battery |
+| Car charger power sensor | `sensor.charger_power_active_import` (W or kW; empty = not used) |
 | Sell at full power above the sell price | on |
 | Power when selling | 3500 W |
 
@@ -158,8 +161,11 @@ All on/off settings are also available as switches on the integration's device p
 | Charge on solar surplus | Battery charge settings → Charge on solar surplus |
 | Solar charging only below discharge price | Battery charge settings → Charge on solar surplus |
 | Discharge to consumption | Battery discharge settings → Control discharging |
-| Sell at full power above sell price | Battery discharge settings |
+| Sell at full power above sell price | Battery discharge settings (off = never export, only discharge to consumption) |
+| Do not discharge while car is charging | Battery discharge settings |
 | Stored energy cost as discharge floor | Planning |
+
+The **Discharge reaction speed** slider (1–10) is also on the device page, under Controls.
 
 ## Dashboard cards
 

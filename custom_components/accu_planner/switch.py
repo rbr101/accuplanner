@@ -13,6 +13,7 @@ from .const import (
     CONF_COST_FLOOR,
     CONF_CTRL_CHARGE_MAX,
     CONF_CTRL_SAFE_ON_OFF,
+    CONF_DIS_CAR_BLOCK,
     CONF_DIS_ENABLED,
     CONF_DIS_SELL_ENABLED,
     CONF_PLAN_ENABLED,
@@ -31,6 +32,7 @@ SETTING_SWITCHES: dict[str, str] = {
     CONF_SOLAR_BELOW_DISCHARGE: "mdi:solar-power-variant",
     CONF_DIS_ENABLED: "mdi:battery-arrow-down",
     CONF_DIS_SELL_ENABLED: "mdi:cash-plus",
+    CONF_DIS_CAR_BLOCK: "mdi:car-electric",
     CONF_COST_FLOOR: "mdi:floor-plan",
 }
 
@@ -127,10 +129,5 @@ class SettingSwitch(SwitchEntity):
         await self._set(False)
 
     async def _set(self, value: bool) -> None:
-        coordinator = self._entry.runtime_data
-        if bool(coordinator.conf.get(self._key)) == value:
-            return
-        coordinator.conf[self._key] = value  # first, so the update listener sees no change and skips the reload
-        self.hass.config_entries.async_update_entry(self._entry, options={**self._entry.options, self._key: value})
+        await self._entry.runtime_data.async_set_option(self._key, value)
         self.async_write_ha_state()
-        await coordinator.executor.async_settings_changed()

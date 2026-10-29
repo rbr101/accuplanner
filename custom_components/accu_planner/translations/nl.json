@@ -130,20 +130,26 @@
       },
       "discharge": {
         "title": "Battery discharge settings",
-        "description": "Gebruikt de accu-aansturing uit Grid & Battery settings:\n• modus-entiteit {mode_entity} → optie '{discharge_option}'\n• vermogens-entiteit {power_entity}\nen de netmeter uit Grid & Battery settings: {export_entity} (teruglevering) / {import_entity} (afname).\n\nBoven de ontlaadprijs levert de accu precies wat het huis verbruikt (afname naar 0 W: elke 3 s meten, elke 20 s bijregelen met 0,25 × de afname). Boven de verkoopprijs ontlaadt hij op vol vermogen en levert hij terug. Op of onder de ontlaadprijs gaat het vermogen naar 0 W. Werkt alleen als 'Accu-plan uitvoeren' aan staat.",
+        "description": "Gebruikt de accu-aansturing uit Grid & Battery settings:\n• modus-entiteit {mode_entity} → optie '{discharge_option}'\n• vermogens-entiteit {power_entity}\nen de netmeter: {export_entity} (teruglevering) / {import_entity} (afname).\n\nBoven de ontlaadprijs levert de accu precies het huisverbruik (netafname naar 0 W: elke 3 s meten, bijsturen met de gekozen reactiesnelheid). Boven de verkoopprijs ontlaadt hij op vol vermogen en levert terug. Op of onder de ontlaadprijs, of terwijl de auto laadt, gaat het vermogen naar 0 W. Alleen actief als 'Accu-plan uitvoeren' aan staat.",
         "data": {
           "discharge_enabled": "Ontladen aansturen",
           "discharge_min_soc": "Niet ontladen onder SOC",
           "discharge_min_power": "Minimaal ontlaadvermogen",
           "discharge_max_power": "Maximaal ontlaadvermogen",
+          "discharge_speed": "Reactiesnelheid (1 = langzaam … 10 = snel)",
+          "discharge_hysteresis": "Hysterese",
+          "discharge_car_block": "Niet ontladen als de auto laadt",
+          "discharge_car_entity": "Vermogenssensor laadpaal",
           "discharge_sell_enabled": "Verkopen op vol vermogen boven de verkoopprijs",
-          "discharge_sell_power": "Vermogen bij verkopen",
-          "discharge_hysteresis": "Hysterese"
+          "discharge_sell_power": "Vermogen bij verkopen"
         },
         "data_description": {
           "discharge_min_power": "Onder dit doelvermogen wordt 0 W gestuurd",
           "discharge_sell_enabled": "Verkoopprijs = (kostprijs accu-inhoud + wear cost & discharge margin) × (1 + winstpercentage), zie de sensor Verkoopprijs. Plant ook terugleveren in het laadplan",
-          "discharge_hysteresis": "Eenmaal aan het ontladen blijft hij ontladen tot de prijs meer dan dit onder de ontlaadprijs zakt (voorkomt aan/uit-wisselen doordat de ontlaadprijs met de SOC meebeweegt)"
+          "discharge_hysteresis": "Eenmaal aan het ontladen blijft hij ontladen tot de prijs meer dan dit onder de ontlaadprijs zakt (voorkomt aan/uit-wisselen doordat de ontlaadprijs met de SOC meebeweegt)",
+          "discharge_speed": "Hoe snel het ontlaadvermogen veranderingen in verbruik volgt. Langzaam: korte pieken (waterkoker, oven die schakelt) worden genegeerd, alleen langere veranderingen worden gevolgd (1 = elke 60 s bijsturen). Snel: volgt ook kortere pieken (10 = elke 5 s). Standaard 4 = elke 20 s bijsturen met 0,25 × de afname",
+          "discharge_car_block": "Boven 0 W op de laadpaalsensor ontlaadt de accu niet (0 W), zodat de auto niet uit de accu wordt geladen",
+          "discharge_car_entity": "Vermogen van de laadpaal (W of kW), bijv. sensor.charger_power_active_import"
         }
       },
       "grid": {
@@ -240,6 +246,14 @@
       },
       "cost_floor": {
         "name": "Kostprijs als ontlaadondergrens"
+      },
+      "discharge_car_block": {
+        "name": "Niet ontladen als de auto laadt"
+      }
+    },
+    "number": {
+      "discharge_speed": {
+        "name": "Reactiesnelheid ontladen"
       }
     }
   },

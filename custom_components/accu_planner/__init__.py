@@ -26,7 +26,7 @@ from .const import (
 from .coordinator import AccuPlannerConfigEntry, AccuPlannerCoordinator
 from .executor import PlanExecutor
 
-PLATFORMS = [Platform.SENSOR, Platform.SWITCH]
+PLATFORMS = [Platform.NUMBER, Platform.SENSOR, Platform.SWITCH]
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 CARD_URL = f"/{DOMAIN}/accu-planner-card.js"
 

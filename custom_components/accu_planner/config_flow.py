@@ -23,7 +23,10 @@ from homeassistant.helpers.selector import (
 from .const import (
     CONF_PLAN_ENABLED,
     OBSOLETE_KEYS,
+    CONF_DIS_CAR_BLOCK,
+    CONF_DIS_CAR_ENTITY,
     CONF_DIS_ENABLED,
+    CONF_DIS_SPEED,
     CONF_DIS_HYSTERESIS,
     CONF_DIS_MAX_POWER,
     CONF_DIS_MIN_POWER,
@@ -228,7 +231,14 @@ def _discharge_schema(cur: dict[str, Any]) -> vol.Schema:
             vol.Required(CONF_DIS_MIN_SOC, default=d[CONF_DIS_MIN_SOC]): _num(0, 100, 1, "%"),
             vol.Required(CONF_DIS_MIN_POWER, default=d[CONF_DIS_MIN_POWER]): _num(0, 5000, 10, "W"),
             vol.Required(CONF_DIS_MAX_POWER, default=d[CONF_DIS_MAX_POWER]): _num(100, 50000, 100, "W"),
+            vol.Required(CONF_DIS_SPEED, default=d[CONF_DIS_SPEED]): NumberSelector(
+                NumberSelectorConfig(min=1, max=10, step=1, mode=NumberSelectorMode.SLIDER)
+            ),
             vol.Required(CONF_DIS_HYSTERESIS, default=d[CONF_DIS_HYSTERESIS]): _num(0, 10, 0.1, "ct/kWh"),
+            vol.Required(CONF_DIS_CAR_BLOCK, default=d[CONF_DIS_CAR_BLOCK]): BooleanSelector(),
+            vol.Optional(
+                CONF_DIS_CAR_ENTITY, description={"suggested_value": d[CONF_DIS_CAR_ENTITY] or None}
+            ): EntitySelector(EntitySelectorConfig(domain="sensor")),
             vol.Required(CONF_DIS_SELL_ENABLED, default=d[CONF_DIS_SELL_ENABLED]): BooleanSelector(),
             vol.Required(CONF_DIS_SELL_POWER, default=d[CONF_DIS_SELL_POWER]): _num(100, 50000, 100, "W"),
         }
@@ -302,6 +312,8 @@ class AccuPlannerOptionsFlow(OptionsFlow):
                 elif not self._has_grid_meter():
                     errors["base"] = "needs_grid_sensors"
             if not errors:
+                user_input.setdefault(CONF_DIS_CAR_ENTITY, "")
+                user_input[CONF_DIS_SPEED] = int(user_input[CONF_DIS_SPEED])
                 return self.async_create_entry(data={**self.config_entry.options, **user_input})
         return self.async_show_form(
             step_id="discharge",

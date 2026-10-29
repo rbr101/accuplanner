@@ -62,8 +62,31 @@ class SurplusRegulator:
 
 # ---------------------------------------------------------------- ontladen
 DIS_SAMPLE_INTERVAL_S = 3
-DIS_CONTROL_INTERVAL_S = 20
+DIS_CONTROL_INTERVAL_S = 20  # speed 4 (default, = Node-RED)
 DIS_GAIN = 0.25
+# reaction speed 1..10 -> (control interval s, gain). The interval is also the averaging
+# window: a peak shorter than the interval is averaged away, a longer one is followed.
+DIS_SPEEDS: dict[int, tuple[int, float]] = {
+    1: (60, 0.15),
+    2: (45, 0.2),
+    3: (30, 0.25),
+    4: (20, 0.25),
+    5: (15, 0.3),
+    6: (12, 0.35),
+    7: (10, 0.4),
+    8: (8, 0.5),
+    9: (6, 0.6),
+    10: (5, 0.7),
+}
+
+
+def discharge_speed(value) -> tuple[int, float]:
+    """(control interval s, gain) for a reaction speed 1..10."""
+    try:
+        speed = int(round(float(value)))
+    except (TypeError, ValueError):
+        speed = 4
+    return DIS_SPEEDS[max(1, min(10, speed))]
 DIS_ROUND_STEP = 50
 DIS_MIN_CHANGE_W = 100
 DIS_STUCK_CYCLES = 5
@@ -85,6 +108,7 @@ class DischargeRegulator:
     samples: list[float] = field(default_factory=list)
     clamped_streak: int = 0
     last_error: float | None = None
+    gain: float = DIS_GAIN
 
     def add_sample(self, error_w: float) -> None:
         """Fout in W: positief = afname van het net (accu moet meer leveren)."""
@@ -97,7 +121,7 @@ class DischargeRegulator:
         avg = sum(self.samples) / len(self.samples)
         self.samples.clear()
         self.last_error = avg
-        value = self.target + round(avg * DIS_GAIN)
+        value = self.target + round(avg * self.gain)
         clamped = value < 0 or value > self.max_out
         value = max(0.0, min(self.max_out, value))
         if clamped:

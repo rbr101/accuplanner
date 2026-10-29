@@ -85,6 +85,19 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.executor = None  # PlanExecutor, gezet in __init__
         self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}")
 
+    async def async_set_option(self, key: str, value: Any) -> None:
+        """Change one setting from a switch/number entity: store it in the options, apply without reload."""
+        if self.conf.get(key) == value:
+            return
+        self.conf[key] = value  # first, so the update listener sees no change and skips the reload
+        self.hass.config_entries.async_update_entry(
+            self.config_entry, options={**self.config_entry.options, key: value}
+        )
+        if self.executor is not None:
+            await self.executor.async_settings_changed()
+        else:
+            await self.async_request_refresh()
+
     async def async_load(self) -> None:
         """Laad de bewaarde kostprijs (alleen in het huidige formaat) en de besparing per dag."""
         data = await self._store.async_load() or {}

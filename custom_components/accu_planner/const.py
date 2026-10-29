@@ -52,6 +52,9 @@ CONF_DIS_MIN_POWER = "discharge_min_power"
 CONF_DIS_MAX_POWER = "discharge_max_power"
 CONF_DIS_SELL_ENABLED = "discharge_sell_enabled"
 CONF_DIS_SELL_POWER = "discharge_sell_power"
+CONF_DIS_SPEED = "discharge_speed"  # 1 (slow, ignore short peaks) .. 10 (fast)
+CONF_DIS_CAR_ENTITY = "discharge_car_entity"  # car charger power (W/kW); > 0 -> do not discharge
+CONF_DIS_CAR_BLOCK = "discharge_car_block"
 CONF_DIS_HYSTERESIS = "discharge_hysteresis"  # ct: blijven ontladen tot prijs < drempel - hysterese
 
 DEFAULTS = {
@@ -94,6 +97,9 @@ DEFAULTS = {
     CONF_DIS_SELL_ENABLED: True,
     CONF_DIS_SELL_POWER: 3500,
     CONF_DIS_HYSTERESIS: 1.0,
+    CONF_DIS_SPEED: 4,
+    CONF_DIS_CAR_ENTITY: "sensor.charger_power_active_import",
+    CONF_DIS_CAR_BLOCK: True,
 }
 
 SERVICE_SET_COST_PRICE = "set_cost_price"
