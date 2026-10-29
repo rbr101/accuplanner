@@ -140,12 +140,12 @@
           "discharge_hysteresis": "Hysterese",
           "discharge_car_block": "Niet ontladen als de auto laadt",
           "discharge_car_entity": "Vermogenssensor laadpaal",
-          "discharge_sell_enabled": "Verkopen op vol vermogen boven de verkoopprijs",
+          "discharge_sell_enabled": "Energie verkopen boven verkoopprijs",
           "discharge_sell_power": "Vermogen bij verkopen"
         },
         "data_description": {
           "discharge_min_power": "Onder dit doelvermogen wordt 0 W gestuurd",
-          "discharge_sell_enabled": "Verkoopprijs = (kostprijs accu-inhoud + wear cost & discharge margin) × (1 + winstpercentage), zie de sensor Verkoopprijs. Plant ook terugleveren in het laadplan",
+          "discharge_sell_enabled": "Aan: boven de verkoopprijs ontlaadt de accu op vol vermogen (Vermogen bij verkopen) en levert terug aan het net; het laadplan plant ook verkoop. Uit: de accu levert nooit terug, hij ontlaadt alleen naar je eigen verbruik en de planner plant geen verkoop. Verkoopprijs = (kostprijs accu-inhoud + slijtage & ontlaadmarge) × (1 + winstpercentage), zie de sensor Verkoopprijs",
           "discharge_hysteresis": "Eenmaal aan het ontladen blijft hij ontladen tot de prijs meer dan dit onder de ontlaadprijs zakt (voorkomt aan/uit-wisselen doordat de ontlaadprijs met de SOC meebeweegt)",
           "discharge_speed": "Hoe snel het ontlaadvermogen veranderingen in verbruik volgt. Langzaam: korte pieken (waterkoker, oven die schakelt) worden genegeerd, alleen langere veranderingen worden gevolgd (1 = elke 60 s bijsturen). Snel: volgt ook kortere pieken (10 = elke 5 s). Standaard 4 = elke 20 s bijsturen met 0,25 × de afname",
           "discharge_car_block": "Boven 0 W op de laadpaalsensor ontlaadt de accu niet (0 W), zodat de auto niet uit de accu wordt geladen",
@@ -236,7 +236,7 @@
         "name": "Ontladen naar verbruik"
       },
       "discharge_sell_enabled": {
-        "name": "Vol vermogen verkopen boven verkoopprijs"
+        "name": "Energie verkopen boven verkoopprijs"
       },
       "control_charge_at_max": {
         "name": "Altijd laden op max laadvermogen"

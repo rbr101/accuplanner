@@ -127,7 +127,7 @@ With its own on/off switch (default off). Works like the original Node-RED disch
 | Hysteresis | 1 ct (once discharging, only stop when the price drops this much below the discharge price) |
 | Do not discharge while the car is charging | on — while the car charger sensor is above 0 W the battery does not discharge (0 W), so the car is not charged from the battery |
 | Car charger power sensor | `sensor.charger_power_active_import` (W or kW; empty = not used) |
-| Sell at full power above the sell price | on |
+| Sell energy above sell price | on — on: above the sell price discharge at full power and export to the grid (the plan also plans selling). Off: never export, only discharge to your own consumption; the planner does not plan selling |
 | Power when selling | 3500 W |
 
 **Priority:** charge window of the planner → discharging (above the discharge price) → solar surplus charging (below the discharge price) → otherwise return once to the discharge setting.
@@ -161,7 +161,7 @@ All on/off settings are also available as switches on the integration's device p
 | Charge on solar surplus | Battery charge settings → Charge on solar surplus |
 | Solar charging only below discharge price | Battery charge settings → Charge on solar surplus |
 | Discharge to consumption | Battery discharge settings → Control discharging |
-| Sell at full power above sell price | Battery discharge settings (off = never export, only discharge to consumption) |
+| Sell energy above sell price | Battery discharge settings (off = never export, only discharge to consumption) |
 | Do not discharge while car is charging | Battery discharge settings |
 | Stored energy cost as discharge floor | Planning |
 

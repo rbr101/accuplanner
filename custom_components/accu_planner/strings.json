@@ -140,13 +140,13 @@
           "discharge_hysteresis": "Hysteresis",
           "discharge_car_block": "Do not discharge while the car is charging",
           "discharge_car_entity": "Car charger power sensor",
-          "discharge_sell_enabled": "Sell at full power above the sell price",
+          "discharge_sell_enabled": "Sell energy above sell price",
           "discharge_sell_power": "Power when selling"
         },
         "data_description": {
           "discharge_min_power": "Below this target 0 W is sent",
           "discharge_hysteresis": "Once discharging, keep discharging until the price drops this much below the discharge price (prevents switching on and off as the discharge price moves with the SOC)",
-          "discharge_sell_enabled": "Sell price = (stored energy cost + wear cost & discharge margin) × (1 + profit percentage), see the Sell price sensor. Also plans export in the charge plan",
+          "discharge_sell_enabled": "On: above the sell price the battery discharges at full power (Power when selling) and exports to the grid; the charge plan also plans selling. Off: the battery never exports, it only discharges to your own consumption, and the planner does not plan selling. Sell price = (stored energy cost + wear cost & discharge margin) × (1 + profit percentage), see the Sell price sensor",
           "discharge_speed": "How fast the discharge power follows changes in consumption. Slow: short peaks (kettle, oven switching) are ignored, only sustained changes are followed (1 = adjust every 60 s). Fast: also follows shorter peaks (10 = every 5 s). Default 4 = adjust every 20 s by 0.25 × the import",
           "discharge_car_block": "Above 0 W on the car charger sensor the battery does not discharge (0 W), so the car is not charged from the battery",
           "discharge_car_entity": "Power of the car charger (W or kW), e.g. sensor.charger_power_active_import"
@@ -236,7 +236,7 @@
         "name": "Discharge to consumption"
       },
       "discharge_sell_enabled": {
-        "name": "Sell at full power above sell price"
+        "name": "Sell energy above sell price"
       },
       "control_charge_at_max": {
         "name": "Always charge at max charge power"
