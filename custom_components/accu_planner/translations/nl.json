@@ -21,7 +21,8 @@
           "min_soc": "Minimale SOC",
           "max_soc": "Maximale SOC",
           "update_interval": "Herberekenen elke",
-          "profit_pct": "Winstpercentage verkoop"
+          "profit_pct": "Winstpercentage verkoop",
+          "sell_price_on_value": "Verkoopprijs op basis van terugladen"
         },
         "data_description": {
           "profile": "Formaat: 07-10=1.5; 17:30-19=2.5; 22-07=1.0; *=0.4  (* = rest van de dag)",
@@ -34,7 +35,8 @@
           "pv_power_sensor": "Voor de kostprijs: het deel van het laden dat de PV levert telt als zonne-energie. Leeg = elke SOC-stijging telt tegen de inkoopprijs",
           "profit_pct": "Verkoopprijs = (kostprijs accu-inhoud + wear cost & discharge margin) × (1 + percentage). Verkopen stel je in bij Battery discharge settings",
           "capacity_sensor": "Totale capaciteit in kWh of Wh",
-          "soc_sensor": "Laadtoestand in %"
+          "soc_sensor": "Laadtoestand in %",
+          "sell_price_on_value": "Aan: verkoopprijs = (waarde van de stroom in de accu, dus wat later terugladen kost + slijtage & ontlaadmarge) × (1 + winstpercentage); verandert per kwartier, net als de ontlaadprijs. Uit: op basis van wat de huidige inhoud kostte (kostprijs accu-inhoud)"
         }
       }
     },
@@ -70,7 +72,8 @@
           "min_soc": "Minimale SOC",
           "max_soc": "Maximale SOC",
           "update_interval": "Herberekenen elke",
-          "profit_pct": "Winstpercentage verkoop"
+          "profit_pct": "Winstpercentage verkoop",
+          "sell_price_on_value": "Verkoopprijs op basis van terugladen"
         },
         "data_description": {
           "profile": "Formaat: 07-10=1.5; 17:30-19=2.5; 22-07=1.0; *=0.4  (* = rest van de dag)",
@@ -81,7 +84,8 @@
           "price_sensor": "Kwartier- of uurprijzen voor afname in de attributen; bepaalt laadkosten en de besparing van eigen verbruik uit de accu",
           "sell_price_sensor": "Prijzen voor teruglevering. Leeg = de inkoopprijs wordt gebruikt",
           "pv_power_sensor": "Voor de kostprijs: het deel van het laden dat de PV levert telt als zonne-energie. Leeg = elke SOC-stijging telt tegen de inkoopprijs",
-          "profit_pct": "Verkoopprijs = (kostprijs accu-inhoud + wear cost & discharge margin) × (1 + percentage). Verkopen stel je in bij Battery discharge settings"
+          "profit_pct": "Verkoopprijs = (kostprijs accu-inhoud + wear cost & discharge margin) × (1 + percentage). Verkopen stel je in bij Battery discharge settings",
+          "sell_price_on_value": "Aan: verkoopprijs = (waarde van de stroom in de accu, dus wat later terugladen kost + slijtage & ontlaadmarge) × (1 + winstpercentage); verandert per kwartier, net als de ontlaadprijs. Uit: op basis van wat de huidige inhoud kostte (kostprijs accu-inhoud)"
         }
       },
       "control": {
@@ -242,6 +246,9 @@
       },
       "discharge_car_block": {
         "name": "Niet ontladen als de auto laadt"
+      },
+      "sell_price_on_value": {
+        "name": "Verkoopprijs op basis van terugladen"
       }
     },
     "number": {

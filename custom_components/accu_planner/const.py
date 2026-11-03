@@ -20,6 +20,7 @@ CONF_MAX_SOC = "max_soc"
 CONF_COST_FLOOR = "cost_floor"  # obsolete (1.14): sunk-cost floor removed
 CONF_ALLOW_EXPORT = "allow_export"  # obsolete (1.11): derived from discharge sell setting
 CONF_PROFIT_PCT = "profit_pct"
+CONF_SELL_ON_VALUE = "sell_price_on_value"  # sell price from replacement value instead of stored cost
 CONF_UPDATE_INTERVAL = "update_interval"
 
 # Aansturing (uitvoeren van het plan)
@@ -73,6 +74,7 @@ DEFAULTS = {
     CONF_MIN_SOC: 5,
     CONF_MAX_SOC: 100,
     CONF_PROFIT_PCT: 20,
+    CONF_SELL_ON_VALUE: True,
     CONF_UPDATE_INTERVAL: 5,
     CONF_CTRL_MODE_ENTITY: "select.buiten_anker_solix_grid_flow",
     CONF_CTRL_OPT_CHARGE: "charge",

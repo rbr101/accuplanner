@@ -16,6 +16,7 @@ from .const import (
     CONF_DIS_ENABLED,
     CONF_DIS_SELL_ENABLED,
     CONF_PLAN_ENABLED,
+    CONF_SELL_ON_VALUE,
     CONF_SOLAR_BELOW_DISCHARGE,
     CONF_SOLAR_ENABLED,
     DOMAIN,
@@ -32,6 +33,7 @@ SETTING_SWITCHES: dict[str, str] = {
     CONF_DIS_ENABLED: "mdi:battery-arrow-down",
     CONF_DIS_SELL_ENABLED: "mdi:cash-plus",
     CONF_DIS_CAR_BLOCK: "mdi:car-electric",
+    CONF_SELL_ON_VALUE: "mdi:cash-sync",
 }
 
 

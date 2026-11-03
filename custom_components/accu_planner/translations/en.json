@@ -21,6 +21,7 @@
           "min_soc": "Minimum SOC",
           "max_soc": "Maximum SOC",
           "profit_pct": "Sell profit percentage",
+          "sell_price_on_value": "Sell price based on replacement value",
           "update_interval": "Recalculate every"
         },
         "data_description": {
@@ -34,7 +35,8 @@
           "efficiency": "Share of grid energy that ends up in the battery (10 kWh stored ≈ 11.8 kWh from the grid at 85%)",
           "wear_cost": "Battery wear plus extra margin per kWh discharged. Added to the discharge price, the sell price and the savings after wear",
           "solar_cost": "Cost of an SOC increase without charging from the grid",
-          "profit_pct": "Sell price = (stored energy cost + wear cost & discharge margin) × (1 + percentage). Selling is controlled in Battery discharge settings"
+          "profit_pct": "Sell price = (base + wear cost & discharge margin) × (1 + percentage). Base: the replacement value (option below on) or the stored energy cost, which already includes the charge efficiency",
+          "sell_price_on_value": "On: sell price = (value of the energy in the battery, i.e. what recharging it later costs + wear cost & discharge margin) × (1 + profit percentage); it changes per quarter like the discharge price. Off: based on what the current content cost (stored energy cost)"
         }
       }
     },
@@ -70,6 +72,7 @@
           "min_soc": "Minimum SOC",
           "max_soc": "Maximum SOC",
           "profit_pct": "Sell profit percentage",
+          "sell_price_on_value": "Sell price based on replacement value",
           "update_interval": "Recalculate every"
         },
         "data_description": {
@@ -81,7 +84,8 @@
           "efficiency": "Share of grid energy that ends up in the battery (10 kWh stored ≈ 11.8 kWh from the grid at 85%)",
           "wear_cost": "Battery wear plus extra margin per kWh discharged. Added to the discharge price, the sell price and the savings after wear",
           "solar_cost": "Cost of an SOC increase without charging from the grid",
-          "profit_pct": "Sell price = (stored energy cost + wear cost & discharge margin) × (1 + percentage). Selling is controlled in Battery discharge settings"
+          "profit_pct": "Sell price = (base + wear cost & discharge margin) × (1 + percentage). Base: the replacement value (option below on) or the stored energy cost, which already includes the charge efficiency",
+          "sell_price_on_value": "On: sell price = (value of the energy in the battery, i.e. what recharging it later costs + wear cost & discharge margin) × (1 + profit percentage); it changes per quarter like the discharge price. Off: based on what the current content cost (stored energy cost)"
         }
       },
       "control": {
@@ -242,6 +246,9 @@
       },
       "discharge_car_block": {
         "name": "Do not discharge while car is charging"
+      },
+      "sell_price_on_value": {
+        "name": "Sell price based on replacement value"
       }
     },
     "number": {

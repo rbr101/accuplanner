@@ -332,6 +332,7 @@ class Settings:
     allow_export: bool = False
     profit_pct: float = 20.0
     sell_w: float = 3500  # power when selling at full power (Battery discharge settings)
+    sell_on_value: bool = True  # sell price from the replacement value instead of the stored energy cost
 
 
 @dataclass
@@ -400,8 +401,7 @@ def plan(
     cost = avg_cost if avg_cost is not None else min(sl.price / eff for sl in slots)
     # verkoopprijs: (kostprijs accu-inhoud + slijtage) x (1 + winst%); terugleveren alleen daarboven.
     # De kostprijs is per kWh IN de accu en bevat het laadrendement al (inkoopprijs / rendement).
-    sell_base = cost + s.wear_ct / 100
-    sell_price = sell_base * (1 + s.profit_pct / 100)
+    markup = 1 + s.profit_pct / 100
 
     # ---- rekenrooster
     kmax = max(1, round(emax / STEP))
@@ -488,6 +488,22 @@ def plan(
         elif d < 0:
             d_out[i] = -d * STEP
             export[i] = max(0.0, d_out[i] - slots[i].load) if slots[i].sell is not None else 0.0
+    # ---- ontlaaddrempel: waarde van de volgende kWh op het geplande pad + afschrijving + marge
+    thresholds: list[float] = []
+    for i in range(n):
+        kk = path[i + 1] + 1 if path[i + 1] < path[i] else path[i + 1]
+        kk = max(kmin + 1, min(kmax, kk))
+        mv = float(Vs[i + 1][kk - 1] - Vs[i + 1][kk]) / STEP
+        thresholds.append(mv + extra)
+
+    # ---- sell price per quarter: (base + wear) x (1 + profit %). Base = the replacement value of the
+    # next kWh (what recharging it later costs, like the discharge price) or the stored energy cost.
+    if s.sell_on_value:
+        sell_thr = [t * markup for t in thresholds]
+    else:
+        sell_thr = [(cost + extra) * markup] * n
+    sell_price = sell_thr[0]
+    sell_base = sell_price / markup
     # ---- selling, exactly like the execution (Battery discharge settings): in a quarter where the
     # plan discharges (price above the discharge price) and the feed-in price is above the sell
     # price, discharge at full power; later discharges get what is left above the minimum SOC
@@ -496,7 +512,7 @@ def plan(
         for i, sl in enumerate(slots):
             lvl = min(emax, lvl + c_in[i])
             avail = max(0.0, lvl - emin)
-            if d_out[i] > 0 and sl.quote is not None and sl.quote > sell_price:
+            if d_out[i] > 0 and sl.quote is not None and sl.quote > sell_thr[i]:
                 take = min(max(d_out[i], s.sell_w / 1000 * sl.hours), avail)
                 export[i] = max(0.0, take - sl.load)
                 d_out[i] = take
@@ -507,14 +523,6 @@ def plan(
     for i in range(n):
         level[i + 1] = level[i] + c_in[i] - d_out[i]
     level = [min(emax, max(0.0, lv)) for lv in level]
-
-    # ---- ontlaaddrempel: waarde van de volgende kWh op het geplande pad + afschrijving + marge
-    thresholds: list[float] = []
-    for i in range(n):
-        kk = path[i + 1] + 1 if path[i + 1] < path[i] else path[i + 1]
-        kk = max(kmin + 1, min(kmax, kk))
-        mv = float(Vs[i + 1][kk - 1] - Vs[i + 1][kk]) / STEP
-        thresholds.append(mv + extra)
 
     # ---- nu
     cur = slots[0]
@@ -659,24 +667,25 @@ def plan(
         report.append({"icon": "🔴", "kind": "discharge", "title": "Discharging: no quarters above the discharge price"})
     # selling: planned export, or (selling off) the quarters above the sell price
     sell_ref = [sl.quote for sl in slots]
+    sell_lbl = f"the sell price (now €{sell_price:.3f})" if s.sell_on_value else f"€{sell_price:.3f}"
     if s.allow_export:
         if sell_r:
             report.append({
                 "icon": "💰", "kind": "sell",
-                "title": f"Selling (export > €{sell_price:.3f})",
+                "title": f"Selling (export > {sell_lbl})",
                 "items": [fmt_range(r) for r in sell_r],
                 "sub": f"{export_kwh:.1f} kWh, avg. €{export_rev / export_kwh:.3f}/kWh, revenue €{export_rev:.2f}",
             })
         else:
             report.append({"icon": "💰", "kind": "sell",
-                           "title": f"Selling: no quarters above €{sell_price:.3f}"})
+                           "title": f"Selling: no quarters above {sell_lbl}"})
     else:
-        above = [i for i in range(n) if sell_ref[i] is not None and sell_ref[i] >= sell_price]
+        above = [i for i in range(n) if sell_ref[i] is not None and sell_ref[i] >= sell_thr[i]]
         if above:
             top = max(above, key=lambda i: sell_ref[i])
             report.append({
                 "icon": "💰", "kind": "sell",
-                "title": f"Sell above €{sell_price:.3f} (selling is off)",
+                "title": f"Sell above {sell_lbl} (selling is off)",
                 "items": [fmt_range(r) for r in ranges_where(lambda i: i in set(above))],
                 "sub": f"{len(above)} quarters, highest €{sell_ref[top]:.3f} at {fmt_at(slot_ts(top))}",
             })
@@ -684,7 +693,7 @@ def plan(
             best = max(range(n), key=lambda i: sell_ref[i] if sell_ref[i] is not None else -1e9)
             report.append({
                 "icon": "💰", "kind": "sell",
-                "title": f"Selling: no quarters above €{sell_price:.3f}",
+                "title": f"Selling: no quarters above {sell_lbl}",
                 "sub": f"highest price €{sell_ref[best]:.3f} at {fmt_at(slot_ts(best))}",
             })
     report.append({
@@ -706,8 +715,11 @@ def plan(
     })
     report.append({
         "icon": "💰", "title": f"Sell price: €{sell_price:.3f}/kWh",
-        "sub": f"(€{cost:.3f} stored energy cost incl. {eff * 100:.0f}% efficiency + {s.wear_ct:g} ct wear cost & discharge margin) × "
-               f"{1 + s.profit_pct / 100:.2f}, profit {s.profit_pct:g}%"
+        "sub": (f"(€{value_now:.3f} stored energy value (cost of recharging later) + {s.wear_ct:g} ct wear cost & discharge margin) × "
+                if s.sell_on_value else
+                f"(€{cost:.3f} stored energy cost incl. {eff * 100:.0f}% efficiency + {s.wear_ct:g} ct wear cost & discharge margin) × ")
+               + f"{markup:.2f}, profit {s.profit_pct:g}%"
+               + (" — changes per quarter" if s.sell_on_value else "")
                + ("" if s.allow_export else " — selling is off"),
     })
 
@@ -746,6 +758,7 @@ def plan(
         "energy_value": round(value_now, 4),
         "sell_price": round(sell_price, 4),
         "sell_base": round(sell_base, 4),
+        "sell_on_value": s.sell_on_value,
         "profit_pct": s.profit_pct,
         "allow_export": s.allow_export,
         "cost": round(cost, 4),
@@ -772,6 +785,7 @@ def plan(
             "plan": "." * len(past) + "".join(acts),  # C charge, D discharge, S export, - idle
             "price": [round(prices[t], 4) for t in past] + [round(sl.price, 4) for sl in slots],
             "threshold": [None] * len(past) + [round(t, 4) for t in thresholds],
+            "sell": [None] * len(past) + [round(t, 4) for t in sell_thr],
             "soc": [None] * len(past) + soc_fc,
         },
     }

@@ -140,7 +140,7 @@ class PlanExecutor:
         if not self._conf(CONF_SOLAR_ENABLED):
             self.solar.reset()
         self.async_start()
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.async_refresh()  # immediately, not debounced
         await self.async_apply("setting changed")
         self._notify()
 

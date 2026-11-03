@@ -29,8 +29,8 @@ The discharge price changes during the day (dashed line in the chart): when expe
 
 ### Discharging at maximum power (selling)
 
-The **sell price** = (stored energy cost + wear cost) × (1 + profit percentage).
-*Example:* (€0.348 + €0.03) × 1.75 = **€0.661**.
+The **sell price** = (stored energy value + wear cost) × (1 + profit percentage). The stored energy value is what recharging that kWh later costs (like the discharge price), so it changes per quarter. With *Sell price based on replacement value* off, the stored energy cost (what the current content cost) is used instead.
+*Example:* (€0.435 + €0.03) × 1.75 = **€0.814**.
 
 - **Price above the sell price** → discharge at full power (default 3500 W); whatever the house does not use is exported and sold.
   *Example:* Thu 16:45–19:15 (purple strip) → 3.2 kWh sold at an average of €0.717.
@@ -71,7 +71,8 @@ All settings can be changed later via **Configure** on the integration. After up
 | Wear cost & discharge margin | Battery wear plus extra margin per kWh discharged (ct, default 5). Added to the discharge price, the sell price and the savings after wear |
 | Solar energy cost | Cost of an SOC increase without charging from the grid (ct, default 0) |
 | Min/max SOC, max charge/discharge power | Battery limits |
-| Sell profit percentage | Sell price = (stored energy cost + wear cost & discharge margin) × (1 + percentage). The stored energy cost already includes the charge efficiency |
+| Sell profit percentage | Sell price = (base + wear cost & discharge margin) × (1 + percentage) |
+| Sell price based on replacement value | On (default): base = value of the energy in the battery = what recharging it later costs (changes per quarter, like the discharge price). Off: base = stored energy cost (what the current content cost, incl. charge efficiency) |
 
 ### Grid & Battery settings
 
@@ -141,7 +142,7 @@ Execution: after every new plan, every quarter and every minute the desired stat
 | Charge power | Planned charge power now (W) |
 | Discharge power | Expected discharge power now (W) |
 | Discharge price | Value of 1 kWh in the battery (attribute `energy_value`) + wear cost & discharge margin (€/kWh) for the **current** quarter: above this price the battery discharges. The threshold differs per quarter (dashed line in the chart, `series.threshold`) |
-| Sell price | (Stored energy cost incl. efficiency + wear cost & discharge margin) × (1 + profit percentage) |
+| Sell price | (Stored energy value — or with the option off the stored energy cost — + wear cost & discharge margin) × (1 + profit percentage), for the current quarter. Per quarter in `series.sell` |
 | Stored energy cost | Weighted average price per kWh **in** the battery (incl. efficiency losses). Attribute `source`: history / live / manual / estimate |
 | SOC end of plan | Expected SOC at the end of the known prices |
 | Expected savings | What the plan yields until the end of the known prices (€): avoided purchase + export − charging cost, corrected for more/less stored energy at the end. Attribute `after_wear` |
@@ -161,6 +162,7 @@ All on/off settings are also available as switches on the integration's device p
 | Solar charging only below discharge price | Battery charge settings → Charge on solar surplus |
 | Discharge to consumption | Battery discharge settings → Control discharging |
 | Sell energy above sell price | Battery discharge settings (off = never export, only discharge to consumption) |
+| Sell price based on replacement value | Planning |
 | Do not discharge while car is charging | Battery discharge settings |
 
 The **Discharge reaction speed** slider (1–10) is also on the device page, under Controls.
@@ -266,7 +268,7 @@ Dynamic programming over the battery content (steps of 0.05 kWh) until the end o
 - discharging saves the purchase price (self-consumption) or yields the sell price (export); every kWh discharged costs the wear cost & discharge margin;
 - energy still in the battery at the end is worth what recharging in the cheapest quarters costs.
 
-The discharge price does **not** depend on what the energy in the battery cost in the past (that money is already spent). It depends on what it costs to put that kWh back later: if the battery can be recharged at 0.37 after discharging at 0.48, discharging pays off (0.37 ÷ 0.85 + wear < 0.48), even if the current content was charged at 0.40. The stored energy cost is only used for the sell price and the savings figures.
+The discharge price does **not** depend on what the energy in the battery cost in the past (that money is already spent). It depends on what it costs to put that kWh back later: if the battery can be recharged at 0.37 after discharging at 0.48, discharging pays off (0.37 ÷ 0.85 + wear < 0.48), even if the current content was charged at 0.40. The same holds for the sell price (option *Sell price based on replacement value*, default on). The stored energy cost is then only used for the savings figures.
 
 Because the whole horizon is considered at once, the battery only charges what is needed if cheaper charging is possible later (e.g. at night or in the midday dip). The discharge price is the value of the next kWh on the planned path + wear cost & discharge margin.
 
