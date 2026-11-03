@@ -146,7 +146,7 @@ Execution: after every new plan, every quarter and every minute the desired stat
 | Stored energy cost | Weighted average price per kWh **in** the battery (incl. efficiency losses). Attribute `source`: history / live / manual / estimate |
 | SOC end of plan | Expected SOC at the end of the known prices |
 | Expected savings | What the plan yields until the end of the known prices (€): avoided purchase + export − charging cost, corrected for more/less stored energy at the end. Attribute `after_wear` |
-| Total savings | Running total of the actual savings (€, `state_class: total` → long-term statistics). Attributes: `today`, `yesterday`, `this_week`, `previous_week`, `this_month`, `previous_month` |
+| Total savings | Running total of the actual savings (€, `state_class: total` → long-term statistics): per kWh delivered by the battery (SOC drop) the purchase price of **that quarter** − the stored energy cost. SOC drops while the battery holds (0 W), charges or waits for solar are standby consumption and do not count. Attributes: `today`, `yesterday`, `this_week`, `previous_week`, `this_month`, `previous_month`, `kwh_from_battery`, `saved_per_kwh` and `last_discharge` (kWh, price, cost, saved) |
 
 ## Switches (Controls)
 
@@ -199,7 +199,7 @@ max_steps: 12        # number of SOC changes before 'show all' appears
 
 ## Savings
 
-Every kWh discharged from the battery yields (purchase price at that moment − cost of that kWh); the cost already includes charging cost and efficiency. Daily totals are stored and, on first start, filled in from the recorder history (10 days by default).
+Every kWh the battery delivers yields (purchase price of that quarter − stored energy cost); the cost already includes charging cost and efficiency. A discharge that spans two quarters is split over both prices. Standby SOC drops (battery holding at 0 W, charging, waiting for solar) are not counted. Daily totals are stored and, on first start, filled in from the recorder history (10 days by default).
 
 Per period, without extra sensors, with the standard HA cards on **Total savings** (check the entity ID under Settings → Entities):
 

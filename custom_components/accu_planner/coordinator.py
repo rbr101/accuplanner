@@ -81,6 +81,8 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.ledger = SavingsLedger()
         self.sell_cache: dict[int, float] = {}  # feed-in prices, same as price_cache
         self.last_capacity: float | None = None
+        self._was_supplying = True
+        self.last_saving: dict[str, Any] | None = None
         self.price_cache: dict[int, float] = {}  # eerdere kwartierprijzen (de sensor toont alleen vandaag/morgen)
         self.quarter_log: dict[int, dict[str, Any]] = {}  # per verstreken kwartier: plan, gemeten SOC, drempel
         self._reconstructed = False
@@ -260,11 +262,23 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if before is None and self.cost.kwh and self.cost.kwh > 0.05 and e0 - self.cost.kwh > 0.01 and prices:
             # onbekende bestaande inhoud: laten meewegen tegen het goedkoopste terugladen
             self.cost.avg = min(prices.values()) / (float(self.conf[CONF_EFFICIENCY]) / 100)
-        saved = self.cost.step(
-            e0, now_ts, self._unit_cost_fn(lambda ts: prices.get(q_start(ts)), pv_at), lambda ts: prices.get(q_start(ts))
-        )
+        # a SOC drop only counts as savings while the battery supplies the house; while it holds (0 W),
+        # charges or waits for solar the drop is standby consumption of the battery, not saved energy
+        ex = self.executor
+        supplying = ex is None or not ex.enabled or ex.target in ("dis", "dis_sell", "released", "safe", None)
+        count = supplying or self._was_supplying
+        self._was_supplying = supplying
+        price_at = lambda ts: prices.get(q_start(ts))  # noqa: E731
+        saved = self.cost.step(e0, now_ts, self._unit_cost_fn(price_at, pv_at), price_at if count else None)
         if saved:
             self.ledger.add(now_ts, saved[0], saved[1], dt_util.get_default_time_zone())
+            self.last_saving = {
+                "at": dt_util.utc_from_timestamp(now_ts).isoformat(),
+                "kwh": round(saved[1], 3),
+                "price": round(saved[0] / saved[1] + (self.cost.avg or 0), 4),
+                "stored_energy_cost": round(self.cost.avg or 0, 4),
+                "saved_eur": round(saved[0], 4),
+            }
         if self.cost.avg != before and self.cost.source == "none":
             self.cost.source = "live"
 
@@ -405,6 +419,7 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         result["avg_cost_source"] = self.cost.source if self.cost.avg is not None else "estimate"
         result["savings"] = sav = self.ledger.summary(now_ts, tz)
         result["savings_total"] = sav["total"]
+        result["last_saving"] = self.last_saving
         row = {
             "icon": "💶", "kind": "saved",
             "title": f"Saved: today €{sav['today']['eur']:.2f} · yesterday €{sav['yesterday']['eur']:.2f}",

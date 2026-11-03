@@ -120,6 +120,10 @@ SENSORS: tuple[AccuSensorDescription, ...] = (
         attrs_fn=lambda d: {
             **{f"{k}": v["eur"] for k, v in d["savings"].items() if isinstance(v, dict)},
             "kwh_from_battery": {k: v["kwh"] for k, v in d["savings"].items() if isinstance(v, dict)},
+            "saved_per_kwh": {
+                k: round(v["eur"] / v["kwh"], 3) for k, v in d["savings"].items() if isinstance(v, dict) and v["kwh"]
+            },
+            "last_discharge": d.get("last_saving"),
             "since": d["savings"]["first_day"],
         },
     ),

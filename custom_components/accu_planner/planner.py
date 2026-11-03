@@ -200,12 +200,26 @@ class CostState:
                     else:
                         self.avg = (self.avg * self.kwh + unit * delta) / (self.kwh + delta)
             elif delta < -0.01 and value_fn is not None and self.avg is not None:
-                value = value_fn(mid)
+                value = interval_price(value_fn, self.t, ts)
                 if value is not None:
                     result = (-delta * (value - self.avg), -delta)
         self.kwh = e
         self.t = ts
         return result
+
+
+def interval_price(value_fn: Callable[[float], float | None], t0: float, t1: float) -> float | None:
+    """Time-weighted average of value_fn over [t0, t1], per quarter (each quarter at its own price)."""
+    total = weight = 0.0
+    a = t0
+    while a < t1:
+        b = min(t1, (a // Q + 1) * Q)
+        v = value_fn((a + b) / 2)
+        if v is not None:
+            total += v * (b - a)
+            weight += b - a
+        a = b
+    return total / weight if weight > 0 else value_fn((t0 + t1) / 2)
 
 
 @dataclass
