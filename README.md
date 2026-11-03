@@ -63,7 +63,7 @@ All settings can be changed later via **Configure** on the integration. After up
 
 | Setting | Description |
 |---|---|
-| Purchase price sensor | Quarter-hour or hourly purchase prices in the attributes (Zonneplan, Nordpool, EnergyZero, Tibber, …). Used for charging cost and for the savings of self-consumption from the battery |
+| Purchase price sensor | Quarter-hour or hourly purchase prices in the attributes (Zonneplan, Nordpool, EnergyZero, Tibber, …). Used for charging cost and for the savings of self-consumption from the battery. All known prices are stored locally and updated with every new reading; if the sensor is temporarily unavailable (web service down) the stored prices are used, so planning and execution keep working (shown as a ⚠️ row in the charge plan and attribute `price_source: stored`) |
 | Sell price sensor (optional) | Feed-in prices in the same format. Empty = the purchase price is used |
 | PV power sensor (optional) | For the stored energy cost: the share of charging covered by PV counts as solar energy. Empty = every SOC increase is priced at the purchase price |
 | Consumption profile | `07-10=1.5; 17:30-19=2.5; 22-07=1.0; *=0.4` (kW, `*` = rest of the day). Optional separate weekend profile |

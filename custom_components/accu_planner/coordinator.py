@@ -79,6 +79,8 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         self.cost = CostState()
         self.ledger = SavingsLedger()
+        self.sell_cache: dict[int, float] = {}  # feed-in prices, same as price_cache
+        self.last_capacity: float | None = None
         self.price_cache: dict[int, float] = {}  # eerdere kwartierprijzen (de sensor toont alleen vandaag/morgen)
         self.quarter_log: dict[int, dict[str, Any]] = {}  # per verstreken kwartier: plan, gemeten SOC, drempel
         self._reconstructed = False
@@ -106,6 +108,8 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 avg=data.get("avg"), kwh=data.get("kwh"), t=data.get("t"), source=data.get("source") or "live"
             )
         self.price_cache = {int(k): float(v) for k, v in (data.get("price_cache") or {}).items()}
+        self.sell_cache = {int(k): float(v) for k, v in (data.get("sell_cache") or {}).items()}
+        self.last_capacity = data.get("capacity")
         self.quarter_log = {int(k): dict(v) for k, v in (data.get("quarter_log") or {}).items()}
         ledger = data.get("ledger") or {}
         self.ledger = SavingsLedger(
@@ -147,6 +151,8 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             **asdict(self.cost),
             "ledger": {"days": self.ledger.days, "total": self.ledger.total},
             "price_cache": {str(k): v for k, v in self.price_cache.items()},
+            "sell_cache": {str(k): v for k, v in self.sell_cache.items()},
+            "capacity": self.last_capacity,
             "quarter_log": {str(k): v for k, v in self.quarter_log.items()},
         }
 
@@ -282,6 +288,32 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 series["soc"][k] = log.get("s")
                 series["threshold"][k] = log.get("d")
 
+    def _read_cached_prices(
+        self, entity_id: str, cache: dict[int, float], cutoff: float, tz, kind: str
+    ) -> tuple[dict[int, float], dict[int, float], bool]:
+        """Read prices from the sensor, merge them into the local cache; fall back to the cache.
+
+        Returns (prices, new cache, live). New readings overwrite stored prices for the same quarter.
+        """
+        state = self.hass.states.get(entity_id)
+        fresh: dict[int, float] = {}
+        if state is not None and state.state not in (STATE_UNAVAILABLE,):
+            try:
+                fresh = read_prices(dict(state.attributes), tz)
+            except Exception:  # noqa: BLE001 - malformed attributes: use the cache
+                _LOGGER.exception("Reading %s prices from %s failed", kind, entity_id)
+        cache = {t: p for t, p in {**cache, **fresh}.items() if t >= cutoff}
+        live = bool(fresh)
+        key = f"{kind}_live"
+        if live != getattr(self, "_" + key, True):
+            if live:
+                _LOGGER.info("%s is available again; %s prices updated", entity_id, kind)
+            else:
+                _LOGGER.warning("%s has no %s prices (unavailable?); using %d stored quarters", entity_id, kind,
+                                sum(1 for t in cache if t >= dt_util.utcnow().timestamp() - 900))
+        setattr(self, "_" + key, live)
+        return dict(cache), cache, live
+
     def _number(self, entity_id: str) -> tuple[float, str | None]:
         state = self.hass.states.get(entity_id)
         if state is None or state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE, ""):
@@ -295,28 +327,37 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         c = self.conf
         tz = dt_util.get_default_time_zone()
 
-        capacity, unit = self._number(c[CONF_CAPACITY_SENSOR])
-        if (unit or "").lower() == "wh" or capacity > 200:
-            capacity /= 1000
+        try:
+            capacity, unit = self._number(c[CONF_CAPACITY_SENSOR])
+            if (unit or "").lower() == "wh" or capacity > 200:
+                capacity /= 1000
+        except UpdateFailed:
+            if not self.last_capacity:
+                raise
+            capacity = self.last_capacity  # capacity hardly changes: keep using the last known value
         if capacity <= 0:
             raise UpdateFailed("capacity is 0")
+        self.last_capacity = capacity
         soc, _ = self._number(c[CONF_SOC_SENSOR])
 
-        price_state = self.hass.states.get(c[CONF_PRICE_SENSOR])
-        if price_state is None:
-            raise UpdateFailed(f"{c[CONF_PRICE_SENSOR]} not found")
-        prices = read_prices(dict(price_state.attributes), tz)
-        if not prices:
-            raise UpdateFailed(f"no price data in the attributes of {c[CONF_PRICE_SENSOR]}")
-        # verstreken prijzen onthouden, zodat de grafiek tot 24 uur terug kan tonen
+        # Prices are kept locally (also after a restart) and updated with every new reading. If the
+        # price sensor is temporarily unavailable (web service down), the stored prices are used.
         cutoff = dt_util.utcnow().timestamp() - HISTORY_KEEP_S
-        self.price_cache = {t: p for t, p in {**self.price_cache, **prices}.items() if t >= cutoff}
-        prices = {**self.price_cache, **prices}
+        prices, self.price_cache, price_live = self._read_cached_prices(
+            c[CONF_PRICE_SENSOR], self.price_cache, cutoff, tz, "purchase"
+        )
+        q_now = int(dt_util.utcnow().timestamp() // 900 * 900)
+        if q_now not in prices:
+            raise UpdateFailed(
+                f"no price data for the current quarter ({c[CONF_PRICE_SENSOR]} unavailable and no stored prices)"
+            )
 
         sell_prices = None
+        sell_live = True
         if sell_id := c.get(CONF_SELL_PRICE_SENSOR):
-            sell_state = self.hass.states.get(sell_id)
-            sell_prices = read_prices(dict(sell_state.attributes), tz) if sell_state else {}
+            sell_prices, self.sell_cache, sell_live = self._read_cached_prices(
+                sell_id, self.sell_cache, cutoff, tz, "sell"
+            )
             if not sell_prices:
                 _LOGGER.warning("No sell prices in %s; the purchase price is used", sell_id)
 
@@ -374,6 +415,16 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         result["report"].insert(idx + 1, row)
         result["text"] += f"\n{row['icon']} {row['title']}\n({row['sub']})"
         self._log_quarter(result, soc, now_ts, cutoff)
+        result["price_source"] = "sensor" if price_live else "stored"
+        result["sell_price_source"] = "sensor" if sell_live else "stored"
+        if not price_live:
+            until = max(t for t in prices) + 900
+            row = {"icon": "⚠️", "kind": "warning",
+                   "title": "Price sensor unavailable: using stored prices",
+                   "sub": f"{c[CONF_PRICE_SENSOR]} · stored prices until "
+                          f"{dt_util.as_local(dt_util.utc_from_timestamp(until)).strftime('%a %H:%M')}"}
+            result["report"].insert(0, row)
+            result["text"] = f"{row['icon']} {row['title']} ({row['sub']})\n" + result["text"]
         result["capacity_kwh"] = capacity
         result["soc"] = soc
         return result

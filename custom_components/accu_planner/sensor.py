@@ -36,7 +36,7 @@ def _plan_attrs(d: dict[str, Any]) -> dict[str, Any]:
         "next_action", "prices_known_until", "charge_ranges", "discharge_ranges",
         "planned_grid_charge_kwh", "planned_charge_cost", "planned_discharge_kwh", "planned_export_kwh",
         "planned_revenue", "price_now", "sell_price_now", "energy_value", "discharge_price", "avg_cost",
-        "sell_price", "soc", "soc_min", "charge_power", "discharge_power", "report", "soc_steps", "series", "text",
+        "sell_price", "price_source", "sell_price_source", "soc", "soc_min", "charge_power", "discharge_power", "report", "soc_steps", "series", "text",
     )
     return {k: d.get(k) for k in keys}
 
