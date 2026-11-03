@@ -329,7 +329,6 @@ class Settings:
     discharge_w: float = 3500
     min_soc: float = 5
     max_soc: float = 100
-    cost_floor: bool = False
     allow_export: bool = False
     profit_pct: float = 20.0
     sell_w: float = 3500  # power when selling at full power (Battery discharge settings)
@@ -399,7 +398,6 @@ def plan(
         raise ValueError("no price for the current quarter")
 
     cost = avg_cost if avg_cost is not None else min(sl.price / eff for sl in slots)
-    floor = cost + extra if s.cost_floor else -np.inf
     # verkoopprijs: (kostprijs accu-inhoud + slijtage) x (1 + winst%); terugleveren alleen daarboven.
     # De kostprijs is per kWh IN de accu en bevat het laadrendement al (inkoopprijs / rendement).
     sell_base = cost + s.wear_ct / 100
@@ -435,8 +433,10 @@ def plan(
         load_steps = int(min(sl.load, max_out) / STEP + 1e-9)
         if sl.load > EPS:
             load_steps = max(1, load_steps)
-        self_ok = sl.price >= floor
-        sell_ok = sl.sell is not None and sl.sell >= floor
+        # no floor on the stored energy cost: what was paid is sunk; the value of the energy is
+        # what it would cost to recharge it later (the optimisation already accounts for that)
+        self_ok = True
+        sell_ok = sl.sell is not None
         out_steps = int(max_out / STEP + 1e-9) if sell_ok else (load_steps if self_ok else 0)
         # opbrengst per ontlaadstap: eerst eigen verbruik (inkoopprijs), daarna terugleveren
         gains = []
@@ -514,7 +514,7 @@ def plan(
         kk = path[i + 1] + 1 if path[i + 1] < path[i] else path[i + 1]
         kk = max(kmin + 1, min(kmax, kk))
         mv = float(Vs[i + 1][kk - 1] - Vs[i + 1][kk]) / STEP
-        thresholds.append(max(mv + extra, floor))
+        thresholds.append(mv + extra)
 
     # ---- nu
     cur = slots[0]

@@ -50,7 +50,6 @@ from .const import (
     CONF_PROFIT_PCT,
     CONF_CAPACITY_SENSOR,
     CONF_CHARGE_POWER,
-    CONF_COST_FLOOR,
     CONF_DISCHARGE_POWER,
     CONF_EFFICIENCY,
     CONF_MAX_SOC,
@@ -104,7 +103,6 @@ def _schema(cur: dict[str, Any], with_name: bool) -> vol.Schema:
             vol.Required(CONF_DISCHARGE_POWER, default=d[CONF_DISCHARGE_POWER]): _num(100, 50000, 100, "W"),
             vol.Required(CONF_MIN_SOC, default=d[CONF_MIN_SOC]): _num(0, 100, 1, "%"),
             vol.Required(CONF_MAX_SOC, default=d[CONF_MAX_SOC]): _num(1, 100, 1, "%"),
-            vol.Required(CONF_COST_FLOOR, default=d[CONF_COST_FLOOR]): BooleanSelector(),
             vol.Required(CONF_PROFIT_PCT, default=d[CONF_PROFIT_PCT]): _num(0, 500, 1, "%"),
             vol.Required(CONF_UPDATE_INTERVAL, default=d[CONF_UPDATE_INTERVAL]): _num(1, 60, 1, "min"),
         }
@@ -128,7 +126,7 @@ class AccuPlannerConfigFlow(ConfigFlow, domain=DOMAIN):
     """Eerste configuratie."""
 
     VERSION = 1
-    MINOR_VERSION = 3
+    MINOR_VERSION = 4
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         errors: dict[str, str] = {}

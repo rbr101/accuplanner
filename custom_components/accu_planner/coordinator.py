@@ -22,7 +22,6 @@ from .const import (
     CONF_PROFIT_PCT,
     CONF_CAPACITY_SENSOR,
     CONF_CHARGE_POWER,
-    CONF_COST_FLOOR,
     CONF_DISCHARGE_POWER,
     CONF_EFFICIENCY,
     CONF_MAX_SOC,
@@ -332,7 +331,6 @@ class AccuPlannerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             discharge_w=float(c[CONF_DISCHARGE_POWER]),
             min_soc=float(c[CONF_MIN_SOC]),
             max_soc=float(c[CONF_MAX_SOC]),
-            cost_floor=bool(c[CONF_COST_FLOOR]),
             # export is planned only when discharge control will actually sell
             allow_export=bool(c[CONF_DIS_ENABLED] and c[CONF_DIS_SELL_ENABLED]),
             profit_pct=float(c[CONF_PROFIT_PCT]),

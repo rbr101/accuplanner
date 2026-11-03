@@ -10,7 +10,6 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import (
-    CONF_COST_FLOOR,
     CONF_CTRL_CHARGE_MAX,
     CONF_CTRL_SAFE_ON_OFF,
     CONF_DIS_CAR_BLOCK,
@@ -33,7 +32,6 @@ SETTING_SWITCHES: dict[str, str] = {
     CONF_DIS_ENABLED: "mdi:battery-arrow-down",
     CONF_DIS_SELL_ENABLED: "mdi:cash-plus",
     CONF_DIS_CAR_BLOCK: "mdi:car-electric",
-    CONF_COST_FLOOR: "mdi:floor-plan",
 }
 
 

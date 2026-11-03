@@ -20,7 +20,6 @@
           "discharge_power": "Max discharge power",
           "min_soc": "Minimum SOC",
           "max_soc": "Maximum SOC",
-          "cost_floor": "Use stored energy cost as discharge floor",
           "profit_pct": "Sell profit percentage",
           "update_interval": "Recalculate every"
         },
@@ -35,7 +34,6 @@
           "efficiency": "Share of grid energy that ends up in the battery (10 kWh stored ≈ 11.8 kWh from the grid at 85%)",
           "wear_cost": "Battery wear plus extra margin per kWh discharged. Added to the discharge price, the sell price and the savings after wear",
           "solar_cost": "Cost of an SOC increase without charging from the grid",
-          "cost_floor": "On: never discharge below the stored energy cost + wear cost & discharge margin",
           "profit_pct": "Sell price = (stored energy cost + wear cost & discharge margin) × (1 + percentage). Selling is controlled in Battery discharge settings"
         }
       }
@@ -71,7 +69,6 @@
           "discharge_power": "Max discharge power",
           "min_soc": "Minimum SOC",
           "max_soc": "Maximum SOC",
-          "cost_floor": "Use stored energy cost as discharge floor",
           "profit_pct": "Sell profit percentage",
           "update_interval": "Recalculate every"
         },
@@ -84,7 +81,6 @@
           "efficiency": "Share of grid energy that ends up in the battery (10 kWh stored ≈ 11.8 kWh from the grid at 85%)",
           "wear_cost": "Battery wear plus extra margin per kWh discharged. Added to the discharge price, the sell price and the savings after wear",
           "solar_cost": "Cost of an SOC increase without charging from the grid",
-          "cost_floor": "On: never discharge below the stored energy cost + wear cost & discharge margin",
           "profit_pct": "Sell price = (stored energy cost + wear cost & discharge margin) × (1 + percentage). Selling is controlled in Battery discharge settings"
         }
       },
@@ -243,9 +239,6 @@
       },
       "control_safe_on_off": {
         "name": "Return to discharge setting when switched off"
-      },
-      "cost_floor": {
-        "name": "Stored energy cost as discharge floor"
       },
       "discharge_car_block": {
         "name": "Do not discharge while car is charging"

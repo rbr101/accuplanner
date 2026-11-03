@@ -10,7 +10,7 @@ from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import config_validation as cv, entity_registry as er
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.loader import async_get_integration
 
@@ -73,6 +73,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: AccuPlannerConfigEntry
         # 1.11: 'allow export' is derived from the discharge sell setting
         opts = {k: v for k, v in entry.options.items() if k not in OBSOLETE_KEYS}
         hass.config_entries.async_update_entry(entry, options=opts, minor_version=3)
+    if entry.minor_version < 4:
+        # 1.14: the stored-energy-cost discharge floor was removed (sunk cost)
+        opts = {k: v for k, v in entry.options.items() if k not in OBSOLETE_KEYS}
+        hass.config_entries.async_update_entry(entry, options=opts, minor_version=4)
+        ent_reg = er.async_get(hass)
+        if eid := ent_reg.async_get_entity_id("switch", DOMAIN, f"{entry.entry_id}_cost_floor"):
+            ent_reg.async_remove(eid)
     return True
 
 

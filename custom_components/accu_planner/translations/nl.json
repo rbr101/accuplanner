@@ -20,7 +20,6 @@
           "discharge_power": "Max ontlaadvermogen",
           "min_soc": "Minimale SOC",
           "max_soc": "Maximale SOC",
-          "cost_floor": "Kostprijs als ondergrens voor ontladen",
           "update_interval": "Herberekenen elke",
           "profit_pct": "Winstpercentage verkoop"
         },
@@ -30,7 +29,6 @@
           "efficiency": "Deel van de netstroom dat in de accu komt (10 kWh inhoud ≈ 11,8 kWh van het net bij 85%)",
           "wear_cost": "Slijtage van de accu plus extra marge, per kWh die uit de accu komt. Telt mee in de ontlaadprijs (waarde + dit bedrag), de verkoopprijs en de besparing na slijtage",
           "solar_cost": "Kostprijs voor SOC-stijging zonder laden uit het net",
-          "cost_floor": "Aan: nooit ontladen onder kostprijs inhoud + afschrijving + marge",
           "price_sensor": "Kwartier- of uurprijzen voor afname in de attributen; bepaalt laadkosten en de besparing van eigen verbruik uit de accu",
           "sell_price_sensor": "Prijzen voor teruglevering. Leeg = de inkoopprijs wordt gebruikt",
           "pv_power_sensor": "Voor de kostprijs: het deel van het laden dat de PV levert telt als zonne-energie. Leeg = elke SOC-stijging telt tegen de inkoopprijs",
@@ -71,7 +69,6 @@
           "discharge_power": "Max ontlaadvermogen",
           "min_soc": "Minimale SOC",
           "max_soc": "Maximale SOC",
-          "cost_floor": "Kostprijs als ondergrens voor ontladen",
           "update_interval": "Herberekenen elke",
           "profit_pct": "Winstpercentage verkoop"
         },
@@ -81,7 +78,6 @@
           "efficiency": "Deel van de netstroom dat in de accu komt (10 kWh inhoud ≈ 11,8 kWh van het net bij 85%)",
           "wear_cost": "Slijtage van de accu plus extra marge, per kWh die uit de accu komt. Telt mee in de ontlaadprijs (waarde + dit bedrag), de verkoopprijs en de besparing na slijtage",
           "solar_cost": "Kostprijs voor SOC-stijging zonder laden uit het net",
-          "cost_floor": "Aan: nooit ontladen onder kostprijs inhoud + afschrijving + marge",
           "price_sensor": "Kwartier- of uurprijzen voor afname in de attributen; bepaalt laadkosten en de besparing van eigen verbruik uit de accu",
           "sell_price_sensor": "Prijzen voor teruglevering. Leeg = de inkoopprijs wordt gebruikt",
           "pv_power_sensor": "Voor de kostprijs: het deel van het laden dat de PV levert telt als zonne-energie. Leeg = elke SOC-stijging telt tegen de inkoopprijs",
@@ -243,9 +239,6 @@
       },
       "control_safe_on_off": {
         "name": "Terug naar ontlaadstand bij uitschakelen"
-      },
-      "cost_floor": {
-        "name": "Kostprijs als ontlaadondergrens"
       },
       "discharge_car_block": {
         "name": "Niet ontladen als de auto laadt"

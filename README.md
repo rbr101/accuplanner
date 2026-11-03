@@ -71,7 +71,6 @@ All settings can be changed later via **Configure** on the integration. After up
 | Wear cost & discharge margin | Battery wear plus extra margin per kWh discharged (ct, default 5). Added to the discharge price, the sell price and the savings after wear |
 | Solar energy cost | Cost of an SOC increase without charging from the grid (ct, default 0) |
 | Min/max SOC, max charge/discharge power | Battery limits |
-| Use stored energy cost as discharge floor | On: never discharge below the stored energy cost + wear cost & discharge margin (default off) |
 | Sell profit percentage | Sell price = (stored energy cost + wear cost & discharge margin) × (1 + percentage). The stored energy cost already includes the charge efficiency |
 
 ### Grid & Battery settings
@@ -163,7 +162,6 @@ All on/off settings are also available as switches on the integration's device p
 | Discharge to consumption | Battery discharge settings → Control discharging |
 | Sell energy above sell price | Battery discharge settings (off = never export, only discharge to consumption) |
 | Do not discharge while car is charging | Battery discharge settings |
-| Stored energy cost as discharge floor | Planning |
 
 The **Discharge reaction speed** slider (1–10) is also on the device page, under Controls.
 
@@ -267,6 +265,8 @@ Dynamic programming over the battery content (steps of 0.05 kWh) until the end o
 - charging costs purchase price ÷ efficiency per kWh in the battery;
 - discharging saves the purchase price (self-consumption) or yields the sell price (export); every kWh discharged costs the wear cost & discharge margin;
 - energy still in the battery at the end is worth what recharging in the cheapest quarters costs.
+
+The discharge price does **not** depend on what the energy in the battery cost in the past (that money is already spent). It depends on what it costs to put that kWh back later: if the battery can be recharged at 0.37 after discharging at 0.48, discharging pays off (0.37 ÷ 0.85 + wear < 0.48), even if the current content was charged at 0.40. The stored energy cost is only used for the sell price and the savings figures.
 
 Because the whole horizon is considered at once, the battery only charges what is needed if cheaper charging is possible later (e.g. at night or in the midday dip). The discharge price is the value of the next kWh on the planned path + wear cost & discharge margin.
 

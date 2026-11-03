@@ -17,7 +17,7 @@ CONF_CHARGE_POWER = "charge_power"
 CONF_DISCHARGE_POWER = "discharge_power"
 CONF_MIN_SOC = "min_soc"
 CONF_MAX_SOC = "max_soc"
-CONF_COST_FLOOR = "cost_floor"
+CONF_COST_FLOOR = "cost_floor"  # obsolete (1.14): sunk-cost floor removed
 CONF_ALLOW_EXPORT = "allow_export"  # obsolete (1.11): derived from discharge sell setting
 CONF_PROFIT_PCT = "profit_pct"
 CONF_UPDATE_INTERVAL = "update_interval"
@@ -34,7 +34,7 @@ CONF_CTRL_POWER_IDLE = "control_power_idle"  # vervallen (1.9)
 CONF_CTRL_SAFE_ON_OFF = "control_safe_on_off"
 CONF_PLAN_ENABLED = "plan_charge_enabled"  # laden volgens plan aan/uit
 CONF_CTRL_DISCHARGE = "control_discharge"  # vervallen (1.9): ontladen via Discharge settings
-OBSOLETE_KEYS = (CONF_DISCHARGE_MARGIN, CONF_CTRL_OPT_IDLE, CONF_CTRL_POWER_IDLE, CONF_CTRL_DISCHARGE, CONF_ALLOW_EXPORT)
+OBSOLETE_KEYS = (CONF_DISCHARGE_MARGIN, CONF_CTRL_OPT_IDLE, CONF_CTRL_POWER_IDLE, CONF_CTRL_DISCHARGE, CONF_ALLOW_EXPORT, CONF_COST_FLOOR)
 
 # Laden bij zonne-overschot
 CONF_SOLAR_ENABLED = "solar_enabled"
@@ -72,7 +72,6 @@ DEFAULTS = {
     CONF_DISCHARGE_POWER: 3500,
     CONF_MIN_SOC: 5,
     CONF_MAX_SOC: 100,
-    CONF_COST_FLOOR: False,
     CONF_PROFIT_PCT: 20,
     CONF_UPDATE_INTERVAL: 5,
     CONF_CTRL_MODE_ENTITY: "select.buiten_anker_solix_grid_flow",
