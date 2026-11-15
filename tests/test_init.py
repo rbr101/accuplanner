@@ -78,9 +78,10 @@ async def test_setup_creates_entities(hass):
     entities = er.async_entries_for_config_entry(ent_reg, entry.entry_id)
     domains = {e.domain for e in entities}
     assert domains == {"sensor", "switch", "number"}
-    mode = next(e.entity_id for e in entities if e.unique_id.endswith("_mode"))
+    # exact unique IDs: the switch "solar_below_discharge_price" also ends with "_discharge_price"
+    mode = ent_reg.async_get_entity_id("sensor", DOMAIN, f"{entry.entry_id}_mode")
     assert hass.states.get(mode).state in ("charge", "discharge", "idle")
-    price = next(e.entity_id for e in entities if e.unique_id.endswith("_discharge_price"))
+    price = ent_reg.async_get_entity_id("sensor", DOMAIN, f"{entry.entry_id}_discharge_price")
     assert float(hass.states.get(price).state) > 0
 
 
