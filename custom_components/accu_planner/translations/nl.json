@@ -130,7 +130,7 @@
       },
       "discharge": {
         "title": "Battery discharge settings",
-        "description": "Gebruikt de accu-aansturing uit Grid & Battery settings:\n• modus-entiteit {mode_entity} → optie '{discharge_option}'\n• vermogens-entiteit {power_entity}\nen de netmeter: {export_entity} (teruglevering) / {import_entity} (afname).\n\nBoven de ontlaadprijs levert de accu precies het huisverbruik (netafname naar 0 W: elke 3 s meten, bijsturen met de gekozen reactiesnelheid). Boven de verkoopprijs ontlaadt hij op vol vermogen en levert terug. Op of onder de ontlaadprijs, of terwijl de auto laadt, gaat het vermogen naar 0 W. Alleen actief als 'Accu-plan uitvoeren' aan staat.",
+        "description": "Gebruikt de accu-aansturing uit Grid & Battery settings:\n• modus-entiteit {mode_entity} → optie \"{discharge_option}\"\n• vermogens-entiteit {power_entity}\nen de netmeter: {export_entity} (teruglevering) / {import_entity} (afname).\n\nBoven de ontlaadprijs levert de accu precies het huisverbruik (netafname naar 0 W: elke 3 s meten, bijsturen met de gekozen reactiesnelheid). Boven de verkoopprijs ontlaadt hij op vol vermogen en levert terug. Op of onder de ontlaadprijs, of terwijl de auto laadt, gaat het vermogen naar 0 W. Alleen actief als 'Accu-plan uitvoeren' aan staat.",
         "data": {
           "discharge_enabled": "Ontladen aansturen",
           "discharge_min_soc": "Niet ontladen onder SOC",

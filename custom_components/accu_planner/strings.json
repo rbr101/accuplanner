@@ -130,7 +130,7 @@
       },
       "discharge": {
         "title": "Battery discharge settings",
-        "description": "Uses the battery control from Grid & Battery settings:\n• mode entity {mode_entity} → option '{discharge_option}'\n• power entity {power_entity}\nand the grid meter: {export_entity} (export) / {import_entity} (import).\n\nAbove the discharge price the battery supplies exactly the house consumption (grid import towards 0 W: measured every 3 s, adjusted at the chosen reaction speed). Above the sell price it discharges at full power and exports. At or below the discharge price, or while the car is charging, the power goes to 0 W. Only active while 'Execute battery plan' is on.",
+        "description": "Uses the battery control from Grid & Battery settings:\n• mode entity {mode_entity} → option \"{discharge_option}\"\n• power entity {power_entity}\nand the grid meter: {export_entity} (export) / {import_entity} (import).\n\nAbove the discharge price the battery supplies exactly the house consumption (grid import towards 0 W: measured every 3 s, adjusted at the chosen reaction speed). Above the sell price it discharges at full power and exports. At or below the discharge price, or while the car is charging, the power goes to 0 W. Only active while 'Execute battery plan' is on.",
         "data": {
           "discharge_enabled": "Control discharging",
           "discharge_min_soc": "Do not discharge below SOC",

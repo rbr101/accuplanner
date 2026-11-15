@@ -48,12 +48,31 @@ The **sell price** = (stored energy value + wear cost) × (1 + profit percentage
 
 ## Installation
 
-**Manual:** copy `custom_components/accu_planner` to `/config/custom_components/` and restart Home Assistant.
+### Marketplace (Home Assistant 2026.11 and newer)
+HACS is built into Home Assistant as the **Marketplace** since 2026.11.
 
-**HACS:** add `https://github.com/rbr101/accuplanner` as a *custom repository* (type *Integration*) and install *Accu Planner*.
+1. Go to **Settings → Marketplace**. The first time, accept the risk notice; until you do, you can browse but not install.
+2. Select **Add from link** and enter `https://github.com/rbr101/accuplanner`. Adding a repository by link needs a GitHub connection: Home Assistant shows a code that you enter on GitHub.
+3. Open **Accu Planner** and select **Install** (twice: on the page and in the dialog).
+4. Restart Home Assistant when **Settings → System → Repairs** asks for it, and refresh your browser once so the cards load.
 
-Then: **Settings → Devices & services → Add integration → Accu Planner**.
-All settings can be changed later via **Configure** on the integration. After updating the integration, restart Home Assistant (Python code is only loaded at startup) and refresh the browser (Ctrl+F5).
+Updates show up in the Marketplace when a new release is published. After an update, restart Home Assistant (Repairs shows a "Restart required" entry) and refresh the browser (Ctrl+F5).
+
+<details>
+<summary>Older Home Assistant (before 2026.11) with HACS</summary>
+
+1. HACS → ⋮ → *Custom repositories* → add `https://github.com/rbr101/accuplanner`, type **Integration**.
+2. Install **Accu Planner** and restart Home Assistant.
+
+When you upgrade to 2026.11, HACS moves to the Marketplace automatically and keeps this integration and its updates.
+</details>
+
+### Manual
+Copy `custom_components/accu_planner` to `<config>/custom_components/` and restart Home Assistant.
+
+### Add the integration
+**Settings → Devices & services → Add integration → Accu Planner**.
+All settings can be changed later via **Configure** on the integration.
 
 ## Settings
 
@@ -272,3 +291,20 @@ The discharge price does **not** depend on what the energy in the battery cost i
 
 Because the whole horizon is considered at once, the battery only charges what is needed if cheaper charging is possible later (e.g. at night or in the midday dip). The discharge price is the value of the next kWh on the planned path + wear cost & discharge margin.
 
+## Icon
+
+The integration ships its own icon and logo (light and dark) in `custom_components/accu_planner/brand/`. Home Assistant 2026.3 and newer shows them automatically; older versions show a placeholder.
+
+## Development
+
+```bash
+pip install pytest pyyaml numpy                    # planner tests only
+pip install pytest-homeassistant-custom-component  # full Home Assistant tests
+pytest
+```
+
+Every push is checked by GitHub Actions: HACS/Marketplace validation, `hassfest` and the tests.
+
+## License
+
+[MIT](LICENSE)

@@ -1,12 +1,15 @@
 {
   "domain": "accu_planner",
   "name": "Accu Planner",
+  "after_dependencies": [
+    "frontend",
+    "recorder"
+  ],
   "codeowners": [
     "@rbr101"
   ],
   "config_flow": true,
   "dependencies": [
-    "frontend",
     "http"
   ],
   "documentation": "https://github.com/rbr101/accuplanner",
@@ -16,8 +19,5 @@
   "requirements": [
     "numpy"
   ],
-  "version": "1.17.0",
-  "after_dependencies": [
-    "recorder"
-  ]
+  "version": "1.18.0"
 }

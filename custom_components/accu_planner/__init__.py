@@ -35,6 +35,8 @@ async def _async_register_card(hass: HomeAssistant) -> None:
     """Maak de dashboardkaart (custom:accu-planner-card) beschikbaar."""
     path = Path(__file__).parent / "frontend" / "accu-planner-card.js"
     await hass.http.async_register_static_paths([StaticPathConfig(CARD_URL, str(path), False)])
+    if "frontend" not in hass.config.components:
+        return  # no frontend (e.g. tests): the card is not needed
     version = (await async_get_integration(hass, DOMAIN)).version
     add_extra_js_url(hass, f"{CARD_URL}?v={version}")
 
