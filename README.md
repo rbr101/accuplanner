@@ -5,6 +5,8 @@ This is a custom homeassistant integration that manages energy efficiency for a 
 I started in nodered and tested it for a few months, now everything seems to work fine and it can run autonomous.
 I used vibe coding to create an home assistant integration which i'm using now.
 
+Tested with Anker solarbank MAX AC battery and zonneplan prices
+
 ![Charge schedule card](https://raw.githubusercontent.com/rbr101/accuplanner/main/images/charge-schedule-card.png)
 
 ## In short: when does the battery charge, discharge and sell?
