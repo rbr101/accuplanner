@@ -94,6 +94,7 @@ All settings can be changed later via **Configure** on the integration.
 | Min/max SOC, max charge/discharge power | Battery limits |
 | Sell profit percentage | Sell price = (base + wear cost & discharge margin) × (1 + percentage) |
 | Sell price based on replacement value | On (default): base = value of the energy in the battery = what recharging it later costs (changes per quarter, like the discharge price). Off: base = stored energy cost (what the current content cost, incl. charge efficiency) |
+| Estimate prices after the known prices | On (default): tomorrow's prices usually arrive in the afternoon. Energy left in the battery at the end of the known prices is valued as if it can be recharged in the next 12 hours at the prices of the same quarters one day earlier (typically a cheap night). Without this the battery would only be used above the cheapest *remaining* price of today, which before noon is often a high threshold. Estimates are only used for this valuation; charging is only planned on known prices |
 
 ### Grid & Battery settings
 
@@ -184,6 +185,7 @@ All on/off settings are also available as switches on the integration's device p
 | Discharge to consumption | Battery discharge settings → Control discharging |
 | Sell energy above sell price | Battery discharge settings (off = never export, only discharge to consumption) |
 | Sell price based on replacement value | Planning |
+| Estimate prices after the known prices | Planning |
 | Do not discharge while car is charging | Battery discharge settings |
 
 The **Discharge reaction speed** slider (1–10) is also on the device page, under Controls.
@@ -287,7 +289,7 @@ Dynamic programming over the battery content (steps of 0.05 kWh) until the end o
 
 - charging costs purchase price ÷ efficiency per kWh in the battery;
 - discharging saves the purchase price (self-consumption) or yields the sell price (export); every kWh discharged costs the wear cost & discharge margin;
-- energy still in the battery at the end is worth what recharging in the cheapest quarters costs.
+- energy still in the battery at the end is worth what recharging in the cheapest quarters costs: the remaining known quarters plus (option *Estimate prices after the known prices*) the 12 hours after them, estimated from the day before.
 
 The discharge price does **not** depend on what the energy in the battery cost in the past (that money is already spent). It depends on what it costs to put that kWh back later: if the battery can be recharged at 0.37 after discharging at 0.48, discharging pays off (0.37 ÷ 0.85 + wear < 0.48), even if the current content was charged at 0.40. The same holds for the sell price (option *Sell price based on replacement value*, default on). The stored energy cost is then only used for the savings figures.
 

@@ -48,6 +48,7 @@ from .const import (
     CONF_CTRL_POWER_ENTITY,
     CONF_CTRL_SAFE_ON_OFF,
     CONF_PROFIT_PCT,
+    CONF_ESTIMATE_AFTER,
     CONF_SELL_ON_VALUE,
     CONF_CAPACITY_SENSOR,
     CONF_CHARGE_POWER,
@@ -106,6 +107,7 @@ def _schema(cur: dict[str, Any], with_name: bool) -> vol.Schema:
             vol.Required(CONF_MAX_SOC, default=d[CONF_MAX_SOC]): _num(1, 100, 1, "%"),
             vol.Required(CONF_PROFIT_PCT, default=d[CONF_PROFIT_PCT]): _num(0, 500, 1, "%"),
             vol.Required(CONF_SELL_ON_VALUE, default=d[CONF_SELL_ON_VALUE]): BooleanSelector(),
+            vol.Required(CONF_ESTIMATE_AFTER, default=d[CONF_ESTIMATE_AFTER]): BooleanSelector(),
             vol.Required(CONF_UPDATE_INTERVAL, default=d[CONF_UPDATE_INTERVAL]): _num(1, 60, 1, "min"),
         }
     )

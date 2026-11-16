@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.19.0] - 2026-11-16
+
+### Added
+- Option **Estimate prices after the known prices** (Planning, and as a switch; default on). Before tomorrow's prices are published, energy left at the end of the known prices is valued as if it can be recharged in the next 12 hours at the prices of the same quarters one day earlier. In the morning the battery is then also used at moderate prices (e.g. €0.40) when a cheap night is likely, instead of only above the cheapest remaining price of today. The estimates are only used for this valuation; charging is only planned on known prices.
+- The charge plan shows how the stored energy value was determined.
+
 ## [1.18.0] - 2026-11-15
 
 ### Added

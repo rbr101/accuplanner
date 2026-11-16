@@ -347,6 +347,7 @@ class Settings:
     profit_pct: float = 20.0
     sell_w: float = 3500  # power when selling at full power (Battery discharge settings)
     sell_on_value: bool = True  # sell price from the replacement value instead of the stored energy cost
+    estimate_after: bool = True  # value leftover energy with prices estimated after the known prices
 
 
 @dataclass
@@ -358,6 +359,19 @@ class Slot:
     max_in: float  # kWh added to the battery
     load: float  # kWh consumption
     quote: float | None = None  # feed-in price of this quarter (sell sensor, else purchase price)
+
+
+ESTIMATE_H = 12  # hours after the known prices that are estimated for the leftover-energy value
+
+
+def estimate_after_horizon(prices: dict[int, float], end: int, hours: float = ESTIMATE_H) -> dict[int, float]:
+    """Estimate prices for [end, end + hours): the same quarter 1 day earlier, else 2 days earlier."""
+    out: dict[int, float] = {}
+    for t in range(end, end + int(hours * 3600), Q):
+        p = prices.get(t - 86400, prices.get(t - 2 * 86400))
+        if p is not None:
+            out[t] = p
+    return out
 
 
 _DAYS = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
@@ -423,8 +437,15 @@ def plan(
     k0 = min(kmax, max(0, round(e0 / STEP)))
     ks_all = np.arange(kmax + 1)
 
-    # eindwaarde: k-de kWh van boven = goedkoopste terugladen (afnemende waarde naar boven)
-    refill = sorted((sl.price / eff, sl.max_in) for sl in slots)
+    # eindwaarde: k-de kWh van boven = goedkoopste terugladen (afnemende waarde naar boven).
+    # Recharging is possible in the remaining known quarters and, with estimate_after, in the
+    # ESTIMATE_H hours after the known prices, estimated from the same quarter 1 (or 2) days earlier.
+    # The estimates are only used for this valuation, never to plan charging.
+    refill_slots = [(sl.price, sl.max_in) for sl in slots]
+    estimated = estimate_after_horizon(prices, slots[-1].start + Q) if s.estimate_after else {}
+    q_in = s.charge_w / 1000 * Q / 3600 * eff
+    refill_slots += [(p, q_in) for p in estimated.values()]
+    refill = sorted((p / eff, kwh) for p, kwh in refill_slots)
     unit_val = np.empty(kmax + 1)
     cum, idx = 0.0, 0
     for k in range(kmax, 0, -1):  # van vol naar leeg
@@ -653,7 +674,10 @@ def plan(
         {"icon": "📅", "title": f"Planning until {fmt_at(end_ts)}"},
         {"icon": "▶️", "title": f"Now: {mode_txt} (price €{cur.price:.3f})"},
         {"icon": "🏷️", "title": f"Stored energy cost: €{cost:.3f}/kWh ({e0:.1f} kWh){est}"},
-        {"icon": "♻️", "title": f"Stored energy value: €{value_now:.3f}/kWh"},
+        {"icon": "♻️", "title": f"Stored energy value: €{value_now:.3f}/kWh",
+         "sub": (f"cost of recharging later; after {local(slots[-1].start + Q).strftime('%a %H:%M')} estimated "
+                 f"from the day before (lowest €{min(estimated.values()):.3f})") if estimated else
+                "cost of recharging later within the known prices"},
     ]
     if charge_r:
         report.append({

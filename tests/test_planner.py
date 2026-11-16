@@ -98,3 +98,26 @@ def test_savings_ledger_periods():
     assert s["today"]["eur"] == 1.0
     assert s["yesterday"]["eur"] == 0.5
     assert s["total"] == 1.5
+
+
+def test_estimate_after_known_prices():
+    """Only today's prices known, cheap night behind us: with the estimate the battery is used at ~0.40."""
+    from datetime import timedelta
+
+    day = datetime(2026, 11, 16, 0, 0, tzinfo=TZ)
+    prices = {}
+    for i in range(96):
+        h = i / 4
+        p = min(0.40, 0.26 + 0.02 * abs(h - 4)) if h < 7 else (0.46 if 17.5 <= h < 20 else 0.40)
+        prices[int((day + timedelta(minutes=15 * i)).timestamp())] = round(p, 3)
+    now = datetime(2026, 11, 16, 8, 11, tzinfo=TZ).timestamp()
+
+    def run(est):
+        return P.plan(now, prices, 21.5, 100, PROFILE, None, TZ, _settings(estimate_after=est), 0.313)
+
+    off, on = run(False), run(True)
+    assert off["discharge_price"] > 0.46  # only the known (expensive) quarters to refill: battery stays full
+    assert not off["discharge_ranges"]
+    assert on["discharge_price"] == pytest.approx(0.40, abs=0.005)
+    assert on["discharge_ranges"]
+    assert on["planned_grid_charge_kwh"] == 0  # estimates are never used to plan charging
